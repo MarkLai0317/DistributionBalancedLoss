@@ -35,8 +35,8 @@ def single_gpu_test(model, data_loader, show=False):
         with torch.no_grad():
             result = model(return_loss=False, rescale=not show, **data)
         results.append(result.cpu().numpy())
-        if show:
-            model.module.show_result(data, result, dataset.img_norm_cfg)
+        # if show:
+        #     model.module.show_result(data, result, dataset.img_norm_cfg)
 
         batch_size = data['img'][0].size(0)
         for _ in range(batch_size):
@@ -181,6 +181,7 @@ def main():
         distributed = False
     else:
         distributed = True
+        print(cfg.dist_params)
         init_dist(args.launcher, **cfg.dist_params)
     rank, _ = get_dist_info()
 
