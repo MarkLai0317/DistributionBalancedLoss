@@ -27,9 +27,9 @@ class SimpleClassifier(BaseClassifier):
         self.head = builder.build_head(head)
         self.train_cfg = train_cfg
         self.test_cfg = test_cfg
-        self.lock_back=lock_back
-        self.lock_neck=lock_neck
-        self.savefeat=savefeat
+        self.lock_back = lock_back
+        self.lock_neck = lock_neck
+        self.savefeat = savefeat
         if self.savefeat and not self.with_neck:
             assert neck is not None, 'We must have a neck'
             assert train_cfg is None, 'this is only at testing stage'
@@ -38,7 +38,11 @@ class SimpleClassifier(BaseClassifier):
         if self.lock_neck:
             print('\033[1;35m >>> neck locked !\033[0;0m')
         self.init_weights(pretrained=pretrained)
-        self.count = CountMeter(num_classes=20)
+        if self.train_cfg:
+            tmpdata = mmcv.load(train_cfg.model.head.loss_cls.freq_file)
+            self.count = CountMeter(num_classes=len(tmpdata['class_freq']))
+        else:
+            self.count = CountMeter(num_classes=20)
 
         # freq = torch.tensor([5,6,6,5,7,16,12,5,9,6,5,5,10,21,6,5],dtype=torch.float)
         # self.cla_weight = torch.mean(torch.sqrt(freq))*(torch.ones(freq.shape,dtype=torch.float) / torch.sqrt(freq)).cuda()

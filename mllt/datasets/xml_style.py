@@ -45,4 +45,3 @@ class XMLDataset(CustomDataset):
             gt_labels[self.cat2label[name]-1] = 1
         ann = dict(labels=gt_labels)
         return ann
-

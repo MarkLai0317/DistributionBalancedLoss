@@ -1,5 +1,5 @@
 import copy
-from collections import Sequence
+from collections.abc import Sequence
 
 import mmcv
 from mmcv.runner import obj_from_dict
@@ -11,7 +11,6 @@ from .. import datasets
 __all__ = [
     'to_tensor', 'random_scale', 'get_dataset'
 ]
-
 
 
 def to_tensor(data):
@@ -69,9 +68,7 @@ def random_scale(img_scales, mode='range'):
     return img_scale
 
 
-
 def get_dataset(data_cfg):
-
     if isinstance(data_cfg['ann_file'], (list, tuple)):
         ann_files = data_cfg['ann_file']
         num_dset = len(ann_files)
@@ -92,9 +89,9 @@ def get_dataset(data_cfg):
         data_info['img_prefix'] = img_prefixes[i]
         dset = obj_from_dict(data_info, datasets)
         dsets.append(dset)
-   
     dset = dsets[0]
     return dset
+
 
 def multi2single(labels):
     """
@@ -108,5 +105,3 @@ def multi2single(labels):
     sin_labels = []
     single_label = []
     return
-
-

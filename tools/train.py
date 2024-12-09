@@ -1,20 +1,21 @@
 from __future__ import division
-
 import os
 import sys
-sys.path.append(os.getcwd())
 import argparse
-
 from mmcv import Config, mkdir_or_exist
 import mmcv
 import os.path as osp
+
+sys.path.append(os.getcwd())
+
 from mllt.datasets import build_dataset
-from mllt.apis import (train_classifier, init_dist, get_root_logger,
-                       set_random_seed)
+from mllt.apis import (train_classifier, init_dist, get_root_logger, set_random_seed)
 import torch
 from mllt.models import build_classifier
 import shutil
 import resource
+
+
 rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
 resource.setrlimit(resource.RLIMIT_NOFILE, (20480, rlimit[1]))
 
@@ -46,6 +47,7 @@ def parse_args():
         os.environ['LOCAL_RANK'] = str(args.local_rank)
 
     return args
+
 
 def main():
     args = parse_args()
@@ -85,7 +87,7 @@ def main():
     train_dataset = build_dataset(cfg.data.train)
 
     if cfg.model.get('info_dir') is not None:
-        mmcv.dump(dict(class_instance_num = train_dataset.class_instance_num.tolist()), osp.join(cfg.model.info_dir))
+        mmcv.dump(dict(class_instance_num=train_dataset.class_instance_num.tolist()), osp.join(cfg.model.info_dir))
 
     model = build_classifier(
         cfg.model, train_cfg=cfg.train_cfg, test_cfg=cfg.test_cfg)
@@ -103,6 +105,7 @@ def main():
         distributed=distributed, validate=args.validate, logger=logger)
 
     logger.info(cfg.work_dir)
+
 
 if __name__ == '__main__':
     main()

@@ -12,7 +12,7 @@ from .registry import DATASETS
 from .builder import build_dataset
 
 __all__ = [
-    'CustomDataset','CocoDataset', 'miniImagenetDataset', 'LvisDataset', 'GroupSampler',
+    'CustomDataset', 'CocoDataset', 'miniImagenetDataset', 'LvisDataset', 'GroupSampler',
     'DistributedGroupSampler', 'build_dataloader', 'to_tensor', 'random_scale',
     'get_dataset', 'ExtraAugmentation',
 ]

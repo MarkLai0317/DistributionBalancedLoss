@@ -130,3 +130,6 @@ test.py
 tools/create_label/*
 *.jpg
 
+# data
+data/
+read_pkl.py

@@ -25,7 +25,7 @@ model = dict(
             focal=dict(focal=True, balance_param=2.0, gamma=2),
             logit_reg=dict(init_bias=0.05, neg_scale=5),
             map_param=dict(alpha=0.1, beta=10.0, gamma=0.3),
-            loss_weight=1.0, freq_file='appendix/VOCdevkit/longtail2012/class_freq.pkl')))
+            loss_weight=1.0, freq_file='appendix/VOCdevkit/partial2012/class_freq.pkl')))
 # model training and testing settings
 train_cfg = dict()
 test_cfg = dict()
@@ -53,7 +53,7 @@ data = dict(
     sampler='ClassAware',
     train=dict(
             type=dataset_type,
-            ann_file=online_data_root + 'longtail2012/img_id.txt',
+            ann_file=online_data_root + 'partial2012/img_id.txt',
             img_prefix=data_root + 'VOC2012/',
             img_scale=(224, 224),
             img_norm_cfg=img_norm_cfg,
@@ -75,7 +75,7 @@ data = dict(
         type=dataset_type,
         ann_file=data_root + 'VOC2007/ImageSets/Main/test.txt',
         img_prefix=data_root + 'VOC2007/',
-        class_split=online_data_root + 'longtail2012/class_split.pkl',
+        class_split=online_data_root + 'partial2012/class_split.pkl',
         img_scale=(224, 224),
         img_norm_cfg=img_norm_cfg,
         size_divisor=32,
