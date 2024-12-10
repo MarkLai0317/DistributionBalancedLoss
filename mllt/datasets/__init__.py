@@ -10,9 +10,10 @@ from .dataset_wrappers import ConcatDataset, RepeatDataset
 from .extra_aug import ExtraAugmentation
 from .registry import DATASETS
 from .builder import build_dataset
+from .coco_group import CocoDatasetGroup
 
 __all__ = [
     'CustomDataset','CocoDataset', 'miniImagenetDataset', 'LvisDataset', 'GroupSampler',
     'DistributedGroupSampler', 'build_dataloader', 'to_tensor', 'random_scale',
-    'get_dataset', 'ExtraAugmentation',
+    'get_dataset', 'ExtraAugmentation', 'CocoDatasetGroup',
 ]
