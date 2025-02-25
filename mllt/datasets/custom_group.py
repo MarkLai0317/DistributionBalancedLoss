@@ -59,7 +59,6 @@ class CustomDataset(Dataset):
             self.img_infos = self.load_annotations(ann_file, LT_ann_file)
         else:
             self.img_infos = self.load_annotations(ann_file)
-        # print(self.img_infos)
         self.ann_file = ann_file
         self.see_only = see_only
         # filter images with no annotation during training
@@ -137,11 +136,12 @@ class CustomDataset(Dataset):
         condition_prob = np.zeros([num_classes, num_classes])
 
         if list:
-            index_dic = [[] for i in range(num_classes)]
+            index_dic = [[] for i in range(num_classes+1)]
         else:
             index_dic = dict()
             for i in range(num_classes):
                 index_dic[i] = []
+            index_dic[num_classes] = []
 
         for i, img_info in enumerate(self.img_infos):
             img_id = img_info['id']
@@ -149,9 +149,12 @@ class CustomDataset(Dataset):
             gt_labels.append(label)
             idx2img_id.append(img_id)
             img_id2idx[img_id] = i
-            for idx in np.where(np.asarray(label) == 1)[0]:
-                index_dic[idx].append(i)
-                co_labels[idx].append(label)
+            if not label.any():
+                index_dic[num_classes].append(i)
+            else:
+                for idx in np.where(np.asarray(label) == 1)[0]:
+                    index_dic[idx].append(i)
+                    co_labels[idx].append(label)
 
         for cla in range(num_classes):
             cls_labels = co_labels[cla]
@@ -161,6 +164,12 @@ class CustomDataset(Dataset):
         ''' save original dataset statistics, run once!'''
         if self.save_info:
             self._save_info(gt_labels, img_id2idx, idx2img_id, condition_prob)
+        
+        if index_dic[num_classes] == []:
+            if list:
+                index_dic.pop()
+            else:
+                del index_dic[num_classes]
 
         if get_labels:
             return index_dic, co_labels
@@ -334,8 +343,7 @@ class CustomDataset(Dataset):
             # full VOC
             # path = 'mllt/appendix/VOCdevkit/class_freq.pkl'
         else:
-            path = 'appendix/mured/class_freq.pkl'
-            # raise NameError
+            raise NameError
 
         if not osp.exists(path):
             mmcv.dump(save_data, path)

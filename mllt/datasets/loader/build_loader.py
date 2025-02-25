@@ -3,7 +3,7 @@ from mmcv.runner import get_dist_info
 from mmcv.parallel import collate
 from torch.utils.data import DataLoader
 
-from .sampler import GroupSampler, DistributedGroupSampler, DistributedSampler, FastRandomIdentitySampler, ClassAwareSampler
+from .sampler import GroupSampler, DistributedGroupSampler, DistributedSampler, FastRandomIdentitySampler, ClassAwareSampler, RandomSampler
 
 # https://github.com/pytorch/pytorch/issues/973
 import resource
@@ -47,6 +47,8 @@ def build_dataloader(dataset,
             else:
                 reduce = 4
             sampler = ClassAwareSampler(data_source=dataset, reduce=reduce)
+        elif 'RandomSampler' in sampler:
+            sampler = RandomSampler(dataset)
         elif 'Group' in sampler:
             sampler = GroupSampler(dataset, imgs_per_gpu) if shuffle else None
         else:
@@ -63,5 +65,6 @@ def build_dataloader(dataset,
         pin_memory=False,
         drop_last=True,
         **kwargs)
+    print("dataloader len:",len(data_loader))
 
     return data_loader

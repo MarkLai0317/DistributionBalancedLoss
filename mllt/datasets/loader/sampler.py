@@ -266,15 +266,16 @@ def class_aware_sample_generator(cls_iter, data_iter_list, n, num_samples_cls=1)
         i += 1
         j += 1
 
-
+# treat all zero
 class ClassAwareSampler(Sampler):
 
-    def __init__(self, data_source, num_samples_cls=3, reduce = 4):
+    def __init__(self, data_source, num_samples_cls=1, reduce = 4):
         random.seed(0)
         torch.manual_seed(0)
         num_classes = len(np.unique(data_source.CLASSES))
-
+        print('num_samples_cls:', num_samples_cls)
         self.epoch = 0
+        
 
         self.class_iter = RandomCycleIter(range(num_classes))
         # cls_data_list = [list() for _ in range(num_classes)]
@@ -287,6 +288,7 @@ class ClassAwareSampler(Sampler):
         self.num_classes = len(self.cls_data_list)
         self.data_iter_list = [RandomCycleIter(x) for x in self.cls_data_list] # repeated
         self.num_samples = int(max([len(x) for x in self.cls_data_list]) * len(self.cls_data_list)/ reduce) # attention, ~ 1500(person) * 80
+        print("reduce", reduce)
         self.num_samples_cls = num_samples_cls
         print('>>> Class Aware Sampler Built! Class number: {}, reduce {}'.format(num_classes, reduce))
 
@@ -321,9 +323,106 @@ class ClassAwareSampler(Sampler):
         # ax2.bar(range(self.num_classes), need_sample[rank_idx], alpha = 0.5, label='need_avg')
         ax2.bar(range(self.num_classes), sample_per_cls[rank_idx], alpha = 0.5, label='ori_distribution')
         plt.legend()
-        plt.savefig('./coco_resample_deduce.jpg')
-        print('saved at ./coco_resample_deduce.jpg')
+        plt.savefig('./mured_group3_resample_deduce.jpg')
+        print('saved at ./mured_group3_resample_deduce.jpg')
         print(np.min(sum_prob), np.max(need_sample))
         exit()
+
+# treat all zero
+# class ClassAwareSampler(Sampler):
+
+#     def __init__(self, data_source, num_samples_cls=3, reduce=4):
+#         random.seed(0)
+#         torch.manual_seed(0)
+        
+#         # Get the original class data list and ground truth labels
+#         self.cls_data_list, self.gt_labels = data_source.get_index_dic(list=True, get_labels=True)
+        
+#         # Identify samples with all-zero labels
+#         zero_label_indices = []
+#         for i, labels in enumerate(self.gt_labels):
+#             if np.sum(labels) == 0:  # All labels are zero
+#                 zero_label_indices.append(i)
+#         print("data len:", len(self.gt_labels))
+        
+#         # If there are samples with all-zero labels, add them as a new class
+#         print(">>> check all zeros")
+#         if zero_label_indices:
+#             print(f">>> Found {len(zero_label_indices)} samples with all-zero labels. Treating them as a new class.")
+#             self.cls_data_list.append(zero_label_indices)
+#         # print(self.cls_data_list)
+
+#         # Update number of classes
+#         self.num_classes = len(self.cls_data_list)
+        
+#         # Create data iterators for each class
+#         self.data_iter_list = [RandomCycleIter(x) for x in self.cls_data_list]
+        
+#         # Calculate the number of samples
+#         self.num_samples = int(max([len(x) for x in self.cls_data_list]) * len(self.cls_data_list) / reduce)
+#         self.num_samples_cls = num_samples_cls
+        
+#         self.class_iter = RandomCycleIter(range(self.num_classes))
+        
+#         self.epoch = 0
+        
+#         print('>>> Class Aware Sampler Built! Class number: {}, reduce {}'.format(self.num_classes, reduce))
+
+#     def __iter__(self):
+#         return class_aware_sample_generator(self.class_iter, self.data_iter_list,
+#                                             self.num_samples, self.num_samples_cls)
+
+#     def __len__(self):
+#         return self.num_samples
+
+#     def set_epoch(self, epoch):
+#         self.epoch = epoch
+    
+#     def get_sample_per_class(self):
+#         condition_prob = np.zeros([self.num_classes, self.num_classes])
+#         sample_per_cls = np.asarray([len(x) for x in self.gt_labels])
+#         rank_idx = np.argsort(-sample_per_cls)
+
+#         for i, cls_labels in enumerate(self.gt_labels):
+#             num = len(cls_labels)
+#             condition_prob[i] = np.sum(np.asarray(cls_labels), axis=0) / num
+
+#         sum_prob = np.sum(condition_prob, axis=0)
+#         need_sample = sample_per_cls / sum_prob
+#         import matplotlib.pyplot as plt
+#         fig = plt.figure()
+#         ax1 = fig.add_subplot(2,1,1)
+#         ax1.bar(range(self.num_classes), sum_prob[rank_idx], alpha = 0.5, color='green', label='sum_j( p(i|j) )')
+#         plt.legend()
+#         plt.hlines(1, 0, self.num_classes, linestyles='dashed', color='r', linewidth=1)
+#         ax2 = fig.add_subplot(2,1,2)
+#         # ax2.bar(range(self.num_classes), need_sample[rank_idx], alpha = 0.5, label='need_avg')
+#         ax2.bar(range(self.num_classes), sample_per_cls[rank_idx], alpha = 0.5, label='ori_distribution')
+#         plt.legend()
+#         plt.savefig('./mured_resample_deduce.jpg')
+#         print('saved at ./mured_resample_deduce.jpg')
+#         print(np.min(sum_prob), np.max(need_sample))
+#         exit()
+
+
+
+class RandomSampler(Sampler):
+    def __init__(self, data_source):
+        """
+        Args:
+            data_source (Dataset): dataset to sample from
+        """
+        self.data_source = data_source
+
+    def __iter__(self):
+        # Generate a random permutation of indices for the dataset
+        n = len(self.data_source)
+        indices = torch.randperm(n).tolist()
+        return iter(indices)
+
+    def __len__(self):
+        return len(self.data_source)
+    def set_epoch(self,  epoch):
+        self.epoch = epoch
 
 
