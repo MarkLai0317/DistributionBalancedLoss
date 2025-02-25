@@ -48,7 +48,7 @@ extra_aug = dict(
     )
 )
 
-img_size=224
+img_size=384
 data = dict(
     imgs_per_gpu=32,
     workers_per_gpu=2,
@@ -104,7 +104,7 @@ log_config = dict(
 evaluation = dict(interval=5)
 # runtime settings
 start_epoch=0
-total_epochs = 8
+total_epochs = 10
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/LT_coco_resnet50_pfc_DB'

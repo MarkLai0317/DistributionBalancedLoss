@@ -1,7 +1,7 @@
 # model settings
 model = dict(
     type='SimpleClassifier',
-    pretrained='torchvision://resnet50',
+    # pretrained='torchvision://resnet50',
     backbone=dict(
         type='ResNet',
         depth=50,
@@ -17,7 +17,7 @@ model = dict(
     head=dict(
         type='ClsHead',
         in_channels=256,
-        num_classes=22,
+        num_classes=80,
         method='fc',
         loss_cls=dict(
             type='ResampleLoss', use_sigmoid=True,
@@ -25,13 +25,13 @@ model = dict(
             focal=dict(focal=True, balance_param=2.0, gamma=2),
             logit_reg=dict(neg_scale=2.0, init_bias=0.05),
             map_param=dict(alpha=0.1, beta=10.0, gamma=0.2),
-            loss_weight=1.0, freq_file='appendix/coco/longtail2017_group/class_freq_group1.pkl')))
+            loss_weight=1.0, freq_file='appendix/coco/longtail2017/class_freq.pkl')))
 # model training and testing settings
 train_cfg = dict()
 test_cfg = dict()
 
 # dataset settings
-dataset_type = 'CocoDatasetOriginalGroup1'
+dataset_type = 'CocoDataset'
 data_root = '/home/mark/Desktop/工研院/multi-label_classification/data/coco/'
 online_data_root = 'appendix/'
 img_norm_cfg = dict(
@@ -55,8 +55,8 @@ data = dict(
     sampler='ClassAware',
     train=dict(
             type=dataset_type,
-            ann_file=data_root + 'annotations/instances_train2017_group1.json',
-            LT_ann_file = [online_data_root + 'coco/longtail2017_group/img_id.pkl'],
+            ann_file=data_root + 'annotations/instances_train2017.json',
+            LT_ann_file = [online_data_root + 'coco/longtail2017/img_id.pkl'],
             img_prefix=data_root + 'train2017/',
             img_scale=(img_size, img_size),
             img_norm_cfg=img_norm_cfg,
@@ -66,7 +66,7 @@ data = dict(
             flip_ratio=0.5),
     val=dict(
         type=dataset_type,
-        ann_file=data_root + 'annotations/instances_val2017_group1.json',
+        ann_file=data_root + 'annotations/instances_val2017.json',
         img_prefix=data_root + 'val2017/',
         img_scale=(img_size, img_size),
         img_norm_cfg=img_norm_cfg,
@@ -75,8 +75,8 @@ data = dict(
         flip_ratio=0),
     test=dict(
         type=dataset_type,
-        ann_file=data_root + 'annotations/instances_val2017_group1.json',
-        class_split=online_data_root + 'coco/longtail2017_group/class_split_group1.pkl',
+        ann_file=data_root + 'annotations/instances_val2017.json',
+        class_split=online_data_root + 'coco/longtail2017/class_split.pkl',
         img_prefix=data_root + 'val2017/',
         img_scale=(img_size, img_size),
         img_norm_cfg=img_norm_cfg,
@@ -104,10 +104,10 @@ log_config = dict(
 evaluation = dict(interval=5)
 # runtime settings
 start_epoch=0
-total_epochs = 16
+total_epochs = 8
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/LT_coco_resnet50_pfc_DB_group1'
+work_dir = './work_dirs/LT_coco_resnet50_pfc_DB'
 load_from = None
 if start_epoch > 0:
     resume_from = work_dir + '/epoch_{}.pth'.format(start_epoch)
