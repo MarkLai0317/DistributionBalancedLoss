@@ -371,6 +371,70 @@ class ResNet(nn.Module):
         out = self.trunk(x)
         return out
 
+import torchvision.models as models
+from ..registry import BACKBONES
+@BACKBONES.register_module
+class PretrainResNet50(nn.Module):
+    def __init__(self, num_classes=None, flatten=True):
+        """
+        Initializes the ResNet50 model.
+
+        Args:
+            num_classes (int, optional): If specified, adds a fully connected layer for classification.
+            flatten (bool): If True, flattens the feature map output after global average pooling.
+        """
+        super(PretrainResNet50, self).__init__()
+        # Load pre-trained ResNet50 model
+        resnet50 = models.resnet50(weights='DEFAULT')
+        
+        # Remove the fully connected (classification) layer
+        self.features = nn.Sequential(
+            resnet50.conv1,
+            resnet50.bn1,
+            resnet50.relu,
+            resnet50.maxpool,
+            resnet50.layer1,
+            resnet50.layer2,
+            resnet50.layer3,
+            resnet50.layer4,
+            resnet50.avgpool,  # Global average pooling
+        )
+
+        print(self.features)
+        
+        self.flatten = flatten
+        self.final_feat_dim = 2048  # Output size after avgpool (ResNet-50 backbone)
+        
+        # Optional fully connected layer for classification
+        if num_classes is not None:
+            self.fc = nn.Sequential(
+                nn.Linear(self.final_feat_dim, 256),
+                nn.BatchNorm1d(256),
+                nn.ReLU(),
+                nn.Linear(256, num_classes),
+            )
+        else:
+            self.fc = None
+
+    def forward(self, x):
+        # Pass through feature extractor
+        features = self.features(x)
+        
+        # Flatten the output if specified
+        if self.flatten:
+            features = features.view(features.size(0), -1)  # Flatten the feature map to [batch_size, 2048]
+        
+        # If a classification head exists, pass through it
+        if self.fc:
+            return self.fc(features)
+        
+        return features
+    def init_weights(self, pretrained=None):
+        if pretrained is not None:
+            self.load_state_dict(torch.load(pretrained, map_location=lambda storage, loc: storage))
+        
+
+
 def Conv4():
     return ConvNet(4)
 
@@ -399,8 +463,9 @@ def ResNet34( flatten = True):
     return ResNet(SimpleBlock, [3,4,6,3],[64,128,256,512], flatten)
 
 def ResNet50( flatten = True):
-    return ResNet(BottleneckBlock, [3,4,6,3], [256,512,1024,2048], flatten)
-
+    print("use resnet50 pretrain")
+    # return ResNet(BottleneckBlock, [3,4,6,3], [256,512,1024,2048], flatten)
+    return PretrainResNet50(flatten=True)
 def ResNet101( flatten = True):
     return ResNet(BottleneckBlock, [3,4,23,3],[256,512,1024,2048], flatten)
 

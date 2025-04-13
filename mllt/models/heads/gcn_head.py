@@ -114,6 +114,8 @@ class GcnHead(nn.Module):
             avg_factor=None,
             reduction_override=reduction_override)
         losses['acc'] = accuracy(cls_score, labels)
+        print('>>>>>>>>>>>>>cls_score\n', cls_score)
+        print('>>>>>>>>>>>>>labels\n', labels)
         return losses
 
     def gen_adj(self, t, adj_file):

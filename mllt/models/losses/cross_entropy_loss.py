@@ -175,3 +175,22 @@ def inverse_sigmoid(Y):
 
     return X
 
+@LOSSES.register_module
+class BCELoss(nn.Module):
+    def __init__(self, reduction='mean'):
+        super(BCELoss, self).__init__()
+        self.reduction = reduction
+
+    def forward(self, cls_score,
+                label,
+                weight=None,
+                avg_factor=None,
+                reduction_override=None,
+                **kwargs):
+        # print(cls_score[:2])
+        # print(label[:2])
+        
+        loss = F.binary_cross_entropy_with_logits(cls_score, label.float(), reduction=self.reduction)
+        # print(loss)
+        return loss
+

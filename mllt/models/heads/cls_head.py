@@ -31,11 +31,12 @@ class ClsHead(nn.Module):
 
 
     def init_weights(self):
-        nn.init.normal_(self.fc_cls.weight, 0, 0.01)
-        nn.init.constant_(self.fc_cls.bias, 0)
-        if self.no_bias:
-            self.fc_cls.bias.requires_grad=False
-            print('No bias for classifier!')
+        pass
+        # nn.init.normal_(self.fc_cls.weight, 0, 0.01)
+        # nn.init.constant_(self.fc_cls.bias, 0)
+        # if self.no_bias:
+        #     self.fc_cls.bias.requires_grad=False
+        #     print('No bias for classifier!')
 
     def forward(self, x):
         x = x.view(x.size(0), -1)
@@ -67,6 +68,8 @@ class ClsHead(nn.Module):
         if isinstance(cls_score, list):
             cls_score = cls_score[0]
         losses['acc'] = accuracy(cls_score, labels)
+        # print('>>>>>>>>>>>>>cls_score\n', cls_score)
+        # print('>>>>>>>>>>>>>labels\n', labels)
         return losses
 
     def nonzero_cosine_similarity(self, x1, x2):

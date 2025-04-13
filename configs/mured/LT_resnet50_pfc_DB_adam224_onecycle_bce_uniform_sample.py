@@ -95,7 +95,7 @@ lr_config = dict(
     div_factor=25,
     final_div_factor=100
 )
-checkpoint_config = dict(interval=4)
+checkpoint_config = dict(interval=1)
 # yapf:disable
 log_config = dict(
     interval=51,

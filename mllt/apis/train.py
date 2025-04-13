@@ -31,9 +31,9 @@ def parse_losses(losses):
         else:
             raise TypeError(
                 '{} is not a tensor or list of tensors'.format(loss_name))
-
+    # print("losses", losses)
     loss = sum(_value for _key, _value in log_vars.items() if 'loss' in _key)
-
+    # print("loss", losses)
     log_vars['loss'] = loss
     for name in log_vars:
         log_vars[name] = log_vars[name].item()

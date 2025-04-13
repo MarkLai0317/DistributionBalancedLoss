@@ -1,19 +1,13 @@
 # model settings
 model = dict(
     type='SimpleClassifier',
-    pretrained='torchvision://resnet50',
     backbone=dict(
-        type='ResNet',
-        depth=50,
-        num_stages=4,
-        out_indices=(0, 1, 2, 3),
-        frozen_stages=1,
-        style='pytorch'),
+        type='PretrainResNet50',),
     neck=dict(
         type='PFC',
         in_channels=2048,
         out_channels=256,
-        dropout=0.5),
+        dropout=0),
     head=dict(
         type='ClsHead',
         in_channels=256,
@@ -34,21 +28,20 @@ test_cfg = dict()
 dataset_type = 'CocoDataset'
 data_root = '/home/mark/Desktop/工研院/multi-label_classification/data/coco/'
 online_data_root = 'appendix/'
-img_norm_cfg = dict(
-    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+img_norm_cfg = dict(to_rgb=True)
 extra_aug = dict(
-    photo_metric_distortion=dict(
-        brightness_delta=32,
-        contrast_range=(0.5, 1.5),
-        saturation_range=(0.5, 1.5),
-        hue_delta=18
-    ),
-    random_crop=dict(
-        min_crop_size=0.8
-    )
+    # photo_metric_distortion=dict(
+    #     brightness_delta=32,
+    #     contrast_range=(0.5, 1.5),
+    #     saturation_range=(0.5, 1.5),
+    #     hue_delta=18
+    # ),
+    # random_crop=dict(
+    #     min_crop_size=0.8
+    # )
 )
 
-img_size=384
+img_size=224
 data = dict(
     imgs_per_gpu=32,
     workers_per_gpu=2,
@@ -93,21 +86,41 @@ lr_config = dict(
     warmup_iters=500,
     warmup_ratio=1.0 / 3,
     step=[5,7])  # 8: [5,7]) 4: [2,3]) 40: [25,35]) 80: [55,75])
-checkpoint_config = dict(interval=8)
+checkpoint_config = dict(interval=1)
 # yapf:disable
 log_config = dict(
     interval=500,
     hooks=[
         dict(type='TextLoggerHook'),
     ])
+
+
+# optimizer = dict(type='Adam', lr=0.002)
+optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
+# learning policy
+lr_config = dict(
+    policy='step',
+    warmup='linear',
+    warmup_iters=500,
+    warmup_ratio=1.0 / 3,
+    step=[5,7])  # 8: [5,7]) 4: [2,3]) 40: [25,35]) 80: [55,75])
+# lr_config = dict(
+#     policy='OneCycle',
+#     max_lr=0.002,
+#     total_steps=705 * 8,
+#     div_factor=25,
+#     final_div_factor=100
+# )
+
+
 # yapf:enable
 evaluation = dict(interval=5)
 # runtime settings
 start_epoch=0
-total_epochs = 10
+total_epochs = 8
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/LT_coco_resnet50_pfc_DB'
+work_dir = './work_dirs/LT_coco_resnet50_pfc_DB_pretrain_256'
 load_from = None
 if start_epoch > 0:
     resume_from = work_dir + '/epoch_{}.pth'.format(start_epoch)

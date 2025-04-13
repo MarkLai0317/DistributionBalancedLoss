@@ -6,6 +6,7 @@ from ..registry import CLASSIFIERS
 from mmcv.parallel import DataContainer as DC
 import torch
 import numpy as np
+from torchinfo import summary
 
 @CLASSIFIERS.register_module
 class SimpleClassifier(BaseClassifier):
@@ -39,6 +40,8 @@ class SimpleClassifier(BaseClassifier):
             print('\033[1;35m >>> neck locked !\033[0;0m')
         self.init_weights(pretrained=pretrained)
         self.count = CountMeter(num_classes=20)
+
+        summary(self, inputsize=(32,3,224,224), depth=4)
 
         # freq = torch.tensor([5,6,6,5,7,16,12,5,9,6,5,5,10,21,6,5],dtype=torch.float)
         # self.cla_weight = torch.mean(torch.sqrt(freq))*(torch.ones(freq.shape,dtype=torch.float) / torch.sqrt(freq)).cuda()

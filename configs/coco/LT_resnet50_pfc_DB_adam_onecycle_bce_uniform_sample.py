@@ -1,14 +1,10 @@
 # model settings
 model = dict(
     type='SimpleClassifier',
-    pretrained='torchvision://resnet50',
     backbone=dict(
-        type='ResNet',
-        depth=50,
-        num_stages=4,
-        out_indices=(0, 1, 2, 3),
-        frozen_stages=1,
-        style='pytorch'),
+        type='PretrainedResNet50',
+        
+       ),
     neck=dict(
         type='PFC',
         in_channels=2048,
@@ -45,7 +41,7 @@ extra_aug = dict(
 
 img_size=224
 data = dict(
-    imgs_per_gpu=32,
+    imgs_per_gpu=10,
     workers_per_gpu=2,
     sampler='RandomSampler',
     train=dict(
@@ -90,15 +86,15 @@ optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
 #     step=[5,7])  # 8: [5,7]) 4: [2,3]) 40: [25,35]) 80: [55,75])
 lr_config = dict(
     policy='OneCycle',
-    max_lr=0.000075,
-    total_steps=59 * 80,
+    max_lr=0.001,
+    total_steps=705 * 8,
     div_factor=25,
     final_div_factor=100
 )
 checkpoint_config = dict(interval=8)
 # yapf:disable
 log_config = dict(
-    interval=59,
+    interval=190,
     hooks=[
         dict(type='TextLoggerHook'),
     ])
@@ -109,7 +105,7 @@ start_epoch=0
 total_epochs = 80
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/coco_LT_resnet50_pfc_DB_adam_onecycle_bce_uniform_sample'
+work_dir = './work_dirs/coco_LT_resnet50_pfc_DB_adam_onecycle_bce_uniform_sample_batch10'
 load_from = None
 if start_epoch > 0:
     resume_from = work_dir + '/epoch_{}.pth'.format(start_epoch)

@@ -53,6 +53,7 @@ class ResampleLoss(nn.Module):
                 self.cls_criterion = partial_cross_entropy
             else:
                 self.cls_criterion = binary_cross_entropy
+                print("use binary cross entropy")
         else:
             self.cls_criterion = cross_entropy
 
@@ -125,8 +126,9 @@ class ResampleLoss(nn.Module):
         else:
             loss = self.cls_criterion(cls_score, label.float(), weight,
                                       reduction=reduction)
-
+        # print("resuction", reduction)
         loss = self.loss_weight * loss
+        # print(loss)
         return loss
 
     def reweight_functions(self, label):

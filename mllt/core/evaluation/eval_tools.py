@@ -104,6 +104,7 @@ def eval_F1(results, gt_labels):
     y_pred = np.asarray(results) > 0
     micro_f1 = f1_score(gt_labels, y_pred, average='micro')
     macro_f1 = f1_score(gt_labels, y_pred, average='macro')
+    print("pred len:", len(y_pred))
     return micro_f1, macro_f1
 
 def eval_acc(results, gt_labels):

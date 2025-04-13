@@ -10,6 +10,24 @@ import pickle
 #     'condition_prob': 2d array, shape = [number_of_labels, number_of_labels], array[i,j] = prob of j = 1 if i = 1
 # }
 
+
+COCO = [
+        'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
+        'train', 'truck', 'boat', 'traffic_light', 'fire_hydrant',
+        'stop_sign', 'parking_meter', 'bench', 'bird', 'cat', 'dog',
+        'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe',
+        'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
+        'skis', 'snowboard', 'sports_ball', 'kite', 'baseball_bat',
+        'baseball_glove', 'skateboard', 'surfboard', 'tennis_racket',
+        'bottle', 'wine_glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
+        'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot',
+        'hot_dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
+        'potted_plant', 'bed', 'dining_table', 'toilet', 'tv', 'laptop',
+        'mouse', 'remote', 'keyboard', 'cell_phone', 'microwave',
+        'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock',
+        'vase', 'scissors', 'teddy_bear', 'hair_drier', 'toothbrush'
+    ]
+
 def calculate_ratio(array: np.array, base_index: int, target_index: int):
     # Ensure the array is a 2D numpy array
     array = np.array(array)
@@ -61,19 +79,42 @@ def filter_label(pkl_path: str, desired_labels: str):
     print([coco_labels[i] for i in desired_indices])
 
 
-    filtered_gt = [np.array([row[i] for i in desired_indices]) for row in data['gt_labels']]
+    # filtered_gt = [np.array([row[i] for i in desired_indices]) for row in data['gt_labels']]
 
-    data["gt_labels"] = filtered_gt
+
+
+    filtered_gt = [
+        np.array([row[i] for i in desired_indices] + [1 if np.all(np.array(row) == 0) else 0])
+        for row in data['gt_labels']
+    ]
+
+    data["gt_labels"] = np.array(filtered_gt)[:, :-1].tolist()
+    
 
     data["class_freq"] = np.sum(np.array( filtered_gt)== 1, axis=0)
 
     data["neg_class_freq"] = np.sum(np.array( filtered_gt)== 0, axis=0)
 
-    data["condition_prob"] = calculate_ratio_all(np.array(filtered_gt))
+    data["condition_prob"] = calculate_ratio_all(np.array(filtered_gt)[:, :-1])
     
 
     return data
     
+
+
+def get_label_group_from_pickle(data):
+    # {
+    #     "head": set(class_split_list[0]),
+    #     "middle": set(class_split_list[1]),
+    #     "tail": set(class_split_list[2])
+    # }
+    label_groups = []
+    for key, value in data.items():
+        group = []
+        for label in value:
+            group.append(COCO[label])
+        label_groups.append(group)
+    return label_groups
 
 
 
@@ -97,22 +138,6 @@ import data_preprocess.group_label as group_label
 import pandas as pd
 import data_preprocess.annotation as annotation
 
-COCO = [
-        'person', 'bicycle', 'car', 'motorcycle', 'airplane', 'bus',
-        'train', 'truck', 'boat', 'traffic_light', 'fire_hydrant',
-        'stop_sign', 'parking_meter', 'bench', 'bird', 'cat', 'dog',
-        'horse', 'sheep', 'cow', 'elephant', 'bear', 'zebra', 'giraffe',
-        'backpack', 'umbrella', 'handbag', 'tie', 'suitcase', 'frisbee',
-        'skis', 'snowboard', 'sports_ball', 'kite', 'baseball_bat',
-        'baseball_glove', 'skateboard', 'surfboard', 'tennis_racket',
-        'bottle', 'wine_glass', 'cup', 'fork', 'knife', 'spoon', 'bowl',
-        'banana', 'apple', 'sandwich', 'orange', 'broccoli', 'carrot',
-        'hot_dog', 'pizza', 'donut', 'cake', 'chair', 'couch',
-        'potted_plant', 'bed', 'dining_table', 'toilet', 'tv', 'laptop',
-        'mouse', 'remote', 'keyboard', 'cell_phone', 'microwave',
-        'oven', 'toaster', 'sink', 'refrigerator', 'book', 'clock',
-        'vase', 'scissors', 'teddy_bear', 'hair_drier', 'toothbrush'
-    ]
 annotation_dir = "/home/mark/Desktop/工研院/multi-label_classification/data/coco/annotations"
 
 if __name__ == "__main__":
@@ -122,7 +147,7 @@ if __name__ == "__main__":
 
     parser.add_argument('--pkl_path', "-cdp",type=str, required=True, help="The name of the file to process")
     parser.add_argument('--output_dir',type=str, required=True, help="output dir")
-    
+    parser.add_argument('--class_split', type=str, default=None, help="class split file")
     args = parser.parse_args()
 
     if not os.path.exists(args.output_dir):
@@ -136,33 +161,38 @@ if __name__ == "__main__":
     df = df.reset_index()
     print(df)
 
-    label_grouper = group_label.DPLabelGrouper(None, "ID", df)
-    label_groups = label_grouper.get_label_group_list()
+    if args.class_split is None:
+
+        label_grouper = group_label.DPLabelGrouper(None, "ID", df)
+        label_groups = label_grouper.get_label_group_list()
+    else:
+        label_groups = get_label_group_from_pickle(get_pkl_file(args.class_split))
+        
 
     for i in range(len(label_groups)):
-        # filtered_data = filter_label(args.pkl_path, label_groups[i])
+        filtered_data = filter_label(args.pkl_path, label_groups[i])
 
-        # output_path = os.path.join(args.output_dir, f"class_freq_group{i+1}.pkl")
+        output_path = os.path.join(args.output_dir, f"class_freq_group{i+1}.pkl")
         
-        # print(f"Filtered data saved to: {output_path}")
-        # with open(output_path, "wb") as file:  # Open in write-binary mode
-        #     pickle.dump(filtered_data, file)
+        print(f"Filtered data saved to: {output_path}")
+        with open(output_path, "wb") as file:  # Open in write-binary mode
+            pickle.dump(filtered_data, file)
 
-        # class split
+        # # class split
 
-        class_split_list = split_list(label_groups[i], 3)
-        class_split = {
-                "head": set(class_split_list[0]),
-                "middle": set(class_split_list[1]),
-                "tail": set(class_split_list[2])
-            }
+        # class_split_list = split_list(label_groups[i], 3)
+        # class_split = {
+        #         "head": set(class_split_list[0]),
+        #         "middle": set(class_split_list[1]),
+        #         "tail": set(class_split_list[2])
+        #     }
         
-        class_split_path = os.path.join(args.output_dir, f"class_split_group{i+1}.pkl")
+        # class_split_path = os.path.join(args.output_dir, f"class_split_group{i+1}.pkl")
         
-        with open(class_split_path, "wb") as file:  # Open in write-binary mode
-            pickle.dump(class_split, file)
+        # with open(class_split_path, "wb") as file:  # Open in write-binary mode
+        #     pickle.dump(class_split, file)
 
-        # # annotation
+        # # # annotation
         # annotation.fileter_annotation(label_groups[i], "/home/mark/Desktop/工研院/multi-label_classification/data/coco/annotations/instances_train2017.json", os.path.join(annotation_dir, f"instances_train2017_group{i+1}.json"))
         # annotation.fileter_annotation(label_groups[i], "/home/mark/Desktop/工研院/multi-label_classification/data/coco/annotations/instances_val2017.json", os.path.join(annotation_dir, f"instances_val2017_group{i+1}.json"))
 

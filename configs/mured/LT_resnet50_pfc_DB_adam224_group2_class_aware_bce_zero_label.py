@@ -2,6 +2,7 @@
 model = dict(
     type='SimpleClassifier',
     pretrained='torchvision://resnet50',
+    
     backbone=dict(
         type='ResNet',
         depth=50,
@@ -27,7 +28,7 @@ test_cfg = dict()
 
 # dataset settings
 dataset_type = 'MuredDatasetGroup2'
-data_root = 'appendix/mured/group2/'
+data_root = 'appendix/mured/'
 online_data_root = 'appendix/mured/group2/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
@@ -91,14 +92,14 @@ optimizer_config = dict(grad_clip=dict(max_norm=35, norm_type=2))
 lr_config = dict(
     policy='OneCycle',
     max_lr=0.000075,
-    total_steps=66 * 80,
+    total_steps=61 * 80,
     div_factor=25,
     final_div_factor=100
 )
-checkpoint_config = dict(interval=2)
+checkpoint_config = dict(interval=1)
 # yapf:disable
 log_config = dict(
-    interval=66,
+    interval=61,
     hooks=[
         dict(type='TextLoggerHook'),
     ])
@@ -109,7 +110,7 @@ start_epoch=0
 total_epochs =80
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/LT_mured_resnet50_pfc_DB_adam224_group2_classaware_bce_zero_label'
+work_dir = './work_dirs/LT_mured_resnet50_pfc_DB_adam224_group2_classaware_bce_zero_label_2'
 load_from = None
 if start_epoch > 0:
     resume_from = work_dir + '/epoch_{}.pth'.format(start_epoch)

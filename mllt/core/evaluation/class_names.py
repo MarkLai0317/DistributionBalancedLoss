@@ -105,4 +105,5 @@ def get_classes(dataset):
             raise ValueError('Unrecognized dataset: {}'.format(dataset))
     else:
         raise TypeError('dataset must a str, but got {}'.format(type(dataset)))
+    print(labels)
     return labels

@@ -1,14 +1,10 @@
 # model settings
 model = dict(
     type='SimpleClassifier',
-    pretrained='torchvision://resnet50',
+    # pretrained='torchvision://resnet50',
     backbone=dict(
-        type='ResNet',
-        depth=50,
-        num_stages=4,
-        out_indices=(0, 1, 2, 3),
-        frozen_stages=1,
-        style='pytorch'),
+        type='PretrainResNet50',
+        ),
     neck=dict(
         type='PFC',
         in_channels=2048,
@@ -19,21 +15,21 @@ model = dict(
         in_channels=256,
         num_classes=20,
         method='fc',
-        loss_cls=dict(
-            type='ResampleLoss', use_sigmoid=True,
-            reweight_func='rebalance',
-            focal=dict(focal=True, balance_param=2.0, gamma=2),
-            logit_reg=dict(init_bias=0.05, neg_scale=5),
-            map_param=dict(alpha=0.1, beta=10.0, gamma=0.3),
-            loss_weight=1.0, freq_file='appendix/VOCdevkit/longtail2012/class_freq.pkl')))
+        loss_cls=dict(type="BCELoss", reduction='mean')))
+            # type='ResampleLoss', use_sigmoid=True,
+            # reweight_func='rebalance',
+            # focal=dict(focal=True, balance_param=2.0, gamma=2),
+            # logit_reg=dict(init_bias=0.05, neg_scale=5),
+            # map_param=dict(alpha=0.1, beta=10.0, gamma=0.3),
+            # loss_weight=1.0, freq_file='appendix/VOCdevkit/longtail2012/class_freq.pkl')))
 # model training and testing settings
 train_cfg = dict()
 test_cfg = dict()
 
 # dataset settings
 dataset_type = 'VOCDataset'
-data_root = '/mnt/SSD/det/VOCdevkit/'
-online_data_root = 'appendix/VOCdevkit/'
+data_root = '/home/mark/Desktop/工研院/multi-label_classification/data/voc/'
+online_data_root = '/home/mark/Desktop/工研院/multi-label_classification/data/voc/DB/'
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 extra_aug = dict(
@@ -53,8 +49,8 @@ data = dict(
     sampler='ClassAware',
     train=dict(
             type=dataset_type,
-            ann_file=online_data_root + 'longtail2012/img_id.txt',
-            img_prefix=data_root + 'VOC2012/',
+            ann_file=online_data_root + 'voc_annotations.pkl',
+            img_prefix=data_root + 'train_images',
             img_scale=(224, 224),
             img_norm_cfg=img_norm_cfg,
             extra_aug=extra_aug,
@@ -64,8 +60,8 @@ data = dict(
     ),
     val=dict(
         type=dataset_type,
-        ann_file=data_root + 'VOC2007/ImageSets/Main/test.txt',
-        img_prefix=data_root + 'VOC2007/',
+        ann_file=online_data_root + 'voc_annotations_test.pkl',
+        img_prefix=data_root + 'test_images',
         img_scale=(224, 224),
         img_norm_cfg=img_norm_cfg,
         size_divisor=32,
@@ -73,9 +69,9 @@ data = dict(
         flip_ratio=0),
     test=dict(
         type=dataset_type,
-        ann_file=data_root + 'VOC2007/ImageSets/Main/test.txt',
-        img_prefix=data_root + 'VOC2007/',
-        class_split=online_data_root + 'longtail2012/class_split.pkl',
+        ann_file=online_data_root + 'voc_annotations_test.pkl',
+        img_prefix=data_root + 'test_images',
+        class_split=online_data_root + 'class_split.pkl',
         img_scale=(224, 224),
         img_norm_cfg=img_norm_cfg,
         size_divisor=32,
@@ -91,7 +87,7 @@ lr_config = dict(
     warmup_iters=500,
     warmup_ratio=1.0 / 3,
     step=[5, 7])
-checkpoint_config = dict(interval=8)
+checkpoint_config = dict(interval=1)
 # yapf:disable
 log_config = dict(
     interval=100,
@@ -99,12 +95,12 @@ log_config = dict(
         dict(type='TextLoggerHook'),
     ])
 # yapf:enable
-evaluation = dict(interval=5)
+evaluation = dict(interval=1)
 # runtime settings
 total_epochs = 8
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/LT_voc_resnet50_pfc_DB'
+work_dir = './work_dirs/LT_voc_resnet50_pfc_DB_classaware_bce'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]
