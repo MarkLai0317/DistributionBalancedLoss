@@ -1,9 +1,9 @@
 #!/bin/bash
 # group_number=$1
-# CONFIG="configs/voc/LT_resnet50_pfc_DB_no_extra_group${group_number}.py"
-# DIR="work_dirs/LT_voc_resnet50_pfc_DB_no_extra_group${group_number}"
-CONFIG="configs/voc/LT_resnet50_pfc_DB.py"
-DIR="work_dirs/LT_voc_resnet50_pfc_DB_classaware_bce"
+CONFIG="configs/coco/LT_resnet50_pfc_DB_classaware_DBloss.py"
+DIR="./work_dirs/LT_coco_resnet50_pfc_DB_classaware_DBloss"
+# CONFIG="configs/voc/LT_resnet50_pfc_DB_uniform_bce.py"
+# DIR="work_dirs/LT_voc_resnet50_pfc_DB_uniform_bce"
 
 BEST_EPOCH_MACRO=1
 BEST_SCORE_MACRO=0.0
@@ -62,4 +62,4 @@ echo "Best epoch for mid macro score: $BEST_EPOCH_MACRO with score: $BEST_SCORE_
 echo "Best epoch for mid mAP: $BEST_EPOCH_MAP with score: $BEST_SCORE_MAP"
 
 echo "Best epoch for total macro score: $BEST_TOTAL_EPOCH_MACRO with score: $BEST_TOTAL_SCORE_MACRO"
-echo "Best epoch for total mAP: $BEST_TOTAL_EPOCH_MAP with score: $BEST_TOTAL_SCORE_MAP" > "voc_new_classaware_DB.txt"
+echo "Best epoch for total mAP: $BEST_TOTAL_EPOCH_MAP with score: $BEST_TOTAL_SCORE_MAP" > "coco/coco_classaware_DBloss.txt"
