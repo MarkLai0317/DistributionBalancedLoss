@@ -4,9 +4,10 @@ from .cross_entropy_loss import (cross_entropy, binary_cross_entropy,
 from .focal_loss import FocalLoss
 from .utils import reduce_loss, weight_reduce_loss, weighted_loss
 from .resample_loss import ResampleLoss
-from .cross_entropy_loss import BCELoss
+from .cross_entropy_loss import BCELoss, MyFocalLoss
+
 __all__ = [
     'accuracy', 'Accuracy', 'cross_entropy', 'binary_cross_entropy',
     'partial_cross_entropy', 'CrossEntropyLoss', 'reduce_loss', 'weight_reduce_loss',
-    'weighted_loss', 'FocalLoss', 'ResampleLoss', 'BCELoss'
+    'weighted_loss', 'FocalLoss', 'ResampleLoss', 'BCELoss', "MyFocalLoss"
 ]

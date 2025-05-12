@@ -194,3 +194,45 @@ class BCELoss(nn.Module):
         # print(loss)
         return loss
 
+
+@LOSSES.register_module
+class MyFocalLoss(nn.Module):
+    def __init__(self, alpha=0.25, gamma=2.0, reduction='mean'):
+        """
+        Focal Loss for binary classification.
+        
+        Args:
+            alpha (float): balancing factor for positive class.
+            gamma (float): focusing parameter.
+            reduction (str): 'mean', 'sum', or 'none'
+        """
+        super(MyFocalLoss, self).__init__()
+        self.alpha = alpha
+        self.gamma = gamma
+        self.reduction = reduction
+
+    def forward(self, cls_score,
+                label,
+                weight=None,
+                avg_factor=None,
+                reduction_override=None,
+                **kwargs):
+        """
+        Args:
+            inputs: raw model outputs (logits), shape (N, *)
+            targets: ground truth binary labels (0 or 1), shape (N, *)
+        """
+        # Sigmoid to get probabilities
+        prob = torch.sigmoid(cls_score)
+        targets = label.type_as(cls_score)  # ensure same type
+
+        # Compute the focal loss components
+        pt = torch.where(targets == 1, prob, 1 - prob)
+        alpha_t = torch.where(targets == 1, self.alpha, 1 - self.alpha)
+        loss = -alpha_t * (1 - pt) ** self.gamma * torch.log(pt + 1e-8)
+
+        if self.reduction == 'mean':
+            return loss.mean()
+        elif self.reduction == 'sum':
+            return loss.sum()
+        return loss

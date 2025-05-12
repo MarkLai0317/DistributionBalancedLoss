@@ -66,6 +66,7 @@ class BaseClassifier(nn.Module):
             return self.aug_test(imgs, img_metas, **kwargs)
 
     def forward(self, img, img_meta=None, return_loss=True, **kwargs):
+        # print("this in in forward", return_loss)
         if return_loss:
             return self.forward_train(img, img_meta, **kwargs)
         else:

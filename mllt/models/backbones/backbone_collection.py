@@ -416,7 +416,10 @@ class PretrainResNet50(nn.Module):
         else:
             self.fc = None
 
+        # print("num_classes", num_classes)
+
     def forward(self, x):
+        # print("input shape:", x.shape)
         # Pass through feature extractor
         features = self.features(x)
         

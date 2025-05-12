@@ -1,0 +1,10 @@
+1_2_3
+Best head mAP: 0.5780 at index 43
+Best mid mAP: 0.6364 at index 73
+Best tail mAP: 0.5460 at index 70
+Best total mAP: 0.5894 at index 77
+
+
+1_2
+Best head mAP: 0.5729 at index 27
+Best mid mAP: 0.6298 at index 51

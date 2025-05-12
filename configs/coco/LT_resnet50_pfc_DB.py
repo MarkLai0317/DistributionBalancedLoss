@@ -30,15 +30,15 @@ data_root = '/home/mark/Desktop/工研院/multi-label_classification/data/coco/'
 online_data_root = 'appendix/'
 img_norm_cfg = dict(to_rgb=True)
 extra_aug = dict(
-    # photo_metric_distortion=dict(
-    #     brightness_delta=32,
-    #     contrast_range=(0.5, 1.5),
-    #     saturation_range=(0.5, 1.5),
-    #     hue_delta=18
-    # ),
-    # random_crop=dict(
-    #     min_crop_size=0.8
-    # )
+    photo_metric_distortion=dict(
+        brightness_delta=32,
+        contrast_range=(0.5, 1.5),
+        saturation_range=(0.5, 1.5),
+        hue_delta=18
+    ),
+    random_crop=dict(
+        min_crop_size=0.8
+    )
 )
 
 img_size=224
@@ -120,7 +120,7 @@ start_epoch=0
 total_epochs = 8
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/LT_coco_resnet50_pfc_DB_pretrain_256'
+work_dir = './work_dirs/LT_coco_resnet50_pfc_DB_pretrain_test'
 load_from = None
 if start_epoch > 0:
     resume_from = work_dir + '/epoch_{}.pth'.format(start_epoch)

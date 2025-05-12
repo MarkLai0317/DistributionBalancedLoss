@@ -7,7 +7,7 @@ model = dict(
         depth=50,
         num_stages=4,
         out_indices=(0, 1, 2, 3),
-        frozen_stages=1,
+        # frozen_stages=1,
         style='pytorch'),
     neck=dict(
         type='PFC',
@@ -104,7 +104,7 @@ evaluation = dict(interval=1)
 total_epochs = 8
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/LT_voc_resnet50_pfc_DB_classaware_DB_original'
+work_dir = './work_dirs/LT_voc_resnet50_pfc_DB_classaware_DB_original2'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]

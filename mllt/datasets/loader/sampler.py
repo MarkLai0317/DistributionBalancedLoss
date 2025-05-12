@@ -275,7 +275,7 @@ class ClassAwareSampler(Sampler):
         num_classes = len(np.unique(data_source.CLASSES))
         print('num_samples_cls:', num_samples_cls)
         self.epoch = 0
-        
+     
 
         self.class_iter = RandomCycleIter(range(num_classes))
         # cls_data_list = [list() for _ in range(num_classes)]
