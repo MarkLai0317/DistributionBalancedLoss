@@ -7,7 +7,7 @@ model = dict(
         type='PFC',
         in_channels=2048,
         out_channels=256,
-        dropout=0),
+        dropout=0.5),
     head=dict(
         type='ClsHead',
         in_channels=256,
@@ -20,7 +20,7 @@ model = dict(
             focal=dict(focal=True, balance_param=2.0, gamma=2),
             logit_reg=dict(neg_scale=2.0, init_bias=0.05),
             map_param=dict(alpha=0.1, beta=10.0, gamma=0.2),
-            loss_weight=1.0, freq_file='/home/mark/Desktop/工研院/multi-label_classification/data/coco/DB/class_freq.pkl')))
+            loss_weight=1.0, freq_file='/home/mark/Desktop/工研院/origin_DBLOSS/appendix/coco/longtail2017/class_freq.pkl')))
 # model training and testing settings
 train_cfg = dict()
 test_cfg = dict()
@@ -29,7 +29,9 @@ test_cfg = dict()
 dataset_type = 'CocoDataset'
 data_root = '/home/mark/Desktop/工研院/multi-label_classification/data/coco/'
 online_data_root = '/home/mark/Desktop/工研院/multi-label_classification/data/coco/DB/'
-img_norm_cfg = dict(to_rgb=True)
+# img_norm_cfg = dict(to_rgb=True)
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 extra_aug = dict(
     photo_metric_distortion=dict(
         brightness_delta=32,
@@ -86,10 +88,10 @@ lr_config = dict(
     warmup_iters=500,
     warmup_ratio=1.0 / 3,
     step=[5,7])  # 8: [5,7]) 4: [2,3]) 40: [25,35]) 80: [55,75])
-checkpoint_config = dict(interval=1)
+checkpoint_config = dict(interval=1, create_symlink=False)
 # yapf:disable
 log_config = dict(
-    interval=59,
+    interval=701,
     hooks=[
         dict(type='TextLoggerHook'),
     ])
@@ -120,7 +122,7 @@ start_epoch=0
 total_epochs = 8
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/LT_coco_resnet50_pfc_DB_classaware_DBloss'
+work_dir = '/media/mark/T7 Shield/work_dirs/LT_coco_resnet50_pfc_DB_classaware_DBloss_test4'
 load_from = None
 if start_epoch > 0:
     resume_from = work_dir + '/epoch_{}.pth'.format(start_epoch)

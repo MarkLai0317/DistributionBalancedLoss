@@ -1,0 +1,5 @@
+Best epoch for total mAP: 50 with score: 0.5993
+Split:  head mAP:0.5694  acc:0.9458  micro:0.6300  macro:0.5051
+Split:   mid mAP:0.6166  acc:0.9811  micro:0.4899  macro:0.4466
+Split:  tail mAP:0.6029  acc:0.9875  micro:0.4362  macro:0.3125
+Split: Total mAP:0.5993  acc:0.9734  micro:0.5743  macro:0.4208

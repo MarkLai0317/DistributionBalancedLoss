@@ -7,7 +7,8 @@ model = dict(
         type='PFC',
         in_channels=2048,
         out_channels=256,
-        dropout=0),
+        dropout=0.5
+        ),
     head=dict(
         type='ClsHead',
         in_channels=256,
@@ -86,7 +87,7 @@ lr_config = dict(
     warmup_iters=500,
     warmup_ratio=1.0 / 3,
     step=[5,7])  # 8: [5,7]) 4: [2,3]) 40: [25,35]) 80: [55,75])
-checkpoint_config = dict(interval=1)
+checkpoint_config = dict(interval=1, create_symlink=False)
 # yapf:disable
 log_config = dict(
     interval=59,
@@ -120,7 +121,7 @@ start_epoch=0
 total_epochs = 8
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/LT_coco_resnet50_pfc_DB_classaware_bce'
+work_dir = '/media/mark/T7 Shield/work_dirs/LT_coco_resnet50_pfc_DB_classaware_bce_dropout'
 load_from = None
 if start_epoch > 0:
     resume_from = work_dir + '/epoch_{}.pth'.format(start_epoch)

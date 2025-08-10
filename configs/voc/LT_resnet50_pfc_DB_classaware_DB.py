@@ -100,7 +100,7 @@ evaluation = dict(interval=1)
 total_epochs = 8
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/LT_voc_resnet50_pfc_DB_new_test2'
+work_dir = './work_dirs/LT_voc_resnet50_pfc_DB_new_v1'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]

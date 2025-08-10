@@ -9,7 +9,7 @@ from .cross_entropy_loss import cross_entropy, binary_cross_entropy, partial_cro
 class FocalLoss(nn.Module):
 
     def __init__(self,
-                 use_sigmoid=False,
+                 use_sigmoid=True,
                  use_kpos=False,
                  reduction='mean',
                  loss_weight=1.0,
@@ -56,3 +56,7 @@ class FocalLoss(nn.Module):
         balanced_focal_loss = self.balance_param * focal_loss
         loss = self.loss_weight * balanced_focal_loss
         return loss
+    
+
+
+

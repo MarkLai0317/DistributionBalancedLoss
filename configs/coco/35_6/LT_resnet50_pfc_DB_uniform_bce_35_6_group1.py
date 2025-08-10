@@ -120,7 +120,7 @@ start_epoch=0
 total_epochs = 80
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/LT_coco_resnet50_pfc_DB_uniform_bce_35_6_group1_test'
+work_dir = './work_dirs/LT_coco_resnet50_pfc_DB_uniform_bce_35_6_group1_v1'
 load_from = None
 if start_epoch > 0:
     resume_from = work_dir + '/epoch_{}.pth'.format(start_epoch)

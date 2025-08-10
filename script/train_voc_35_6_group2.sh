@@ -7,8 +7,8 @@ COUNTER=0
 
 for i in $(seq $START $END)
 do
-  echo "Launching training for group3 l$i r0..."
-  python tools/train.py configs/voc/35_6/LT_resnet50_pfc_DB_uniform_bce_35_6_group2_step${i}.py &
+  echo "Launching training for group2 step$i ..."
+  python tools/train.py configs/voc/35_6/LT_resnet50_pfc_DB_uniform_bce_35_6_group2_CVIR_step${i}.py &
 
   COUNTER=$((COUNTER+1))
 

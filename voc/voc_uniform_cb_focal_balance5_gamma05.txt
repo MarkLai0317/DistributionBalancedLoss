@@ -1,0 +1,4 @@
+Best head mAP: 0.7010 at epoch 22
+Best mid mAP: 0.8631 at epoch 41
+Best tail mAP: 0.8622 at epoch 56
+Best total mAP: 0.8099 at epoch 41

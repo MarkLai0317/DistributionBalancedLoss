@@ -11,7 +11,7 @@ DATA_ROOT="/home/mark/Desktop/工研院/multi-label_classification/data/coco"
 # ONLINE_BASE="${DATA_ROOT}/35_6_group1_l0_r"
 
 # Output directory
-OUTPUT_DIR="configs/coco/35_6"
+OUTPUT_DIR="configs/coco/35_6_CVIR"
 
 # Validate input
 if [ -z "$N" ]; then
@@ -28,9 +28,9 @@ do
 
   CSV_PATH="${DATA_ROOT}/group2_step${i}_train_data.csv"
   NUM_CLASSES=$(head -n 1 "$CSV_PATH" | awk -F',' '{print NF-1}')
-  ONLINE_PATH="${DATA_ROOT}/35_6_group2_step${i}/"
-  WORK_DIR="./work_dirs/LT_coco_resnet50_pfc_DB_uniform_bce_35_6_group2_step${i}"
-  OUTPUT_FILE="${OUTPUT_DIR}/LT_resnet50_pfc_DB_uniform_bce_35_6_group2_step${i}.py"
+  ONLINE_PATH="${DATA_ROOT}/35_6_CVIR_group2_step${i}/"
+  WORK_DIR="./work_dirs/LT_coco_resnet50_pfc_DB_uniform_bce_35_6_CVIR_group2_step${i}"
+  OUTPUT_FILE="${OUTPUT_DIR}/LT_resnet50_pfc_DB_uniform_bce_35_6_CVIR_group2_step${i}.py"
 
   sed \
     -e "s/^\s*num_classes\s*=.*/        num_classes=${NUM_CLASSES},/" \

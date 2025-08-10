@@ -16,7 +16,11 @@ model = dict(
         num_classes=8,
         method='fc',
         loss_cls=dict(
-            type='BCELoss', reduction='mean')))
+          type='CBLoss', 
+          freq_file='/home/mark/Desktop/工研院/multi-label_classification/data/voc/35_6_group3/class_freq.pkl',
+          loss_type= 'sigmoid',
+          no_of_classes=8,
+          )))
 # model training and testing settings
 train_cfg = dict()
 test_cfg = dict()
@@ -95,7 +99,7 @@ evaluation = dict(interval=5)
 total_epochs = 80
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/LT_voc_resnet50_pfc_DB_uniform_bce_35_6_group3'
+work_dir = './work_dirs/LT_voc_resnet50_pfc_DB_uniform_bce_35_6_group3_cb_sigmoid'
 load_from = None
 resume_from = None
 workflow = [('train', 1)]

@@ -29,7 +29,8 @@ test_cfg = dict()
 dataset_type = 'CocoDataset'
 data_root = '/home/mark/Desktop/工研院/multi-label_classification/data/coco/'
 online_data_root = '/home/mark/Desktop/工研院/multi-label_classification/data/coco/DB/'
-img_norm_cfg = dict(to_rgb=True)
+img_norm_cfg = dict(
+    to_rgb=True)
 extra_aug = dict(
     photo_metric_distortion=dict(
         brightness_delta=32,
@@ -86,7 +87,7 @@ lr_config = dict(
     warmup_iters=500,
     warmup_ratio=1.0 / 3,
     step=[55,75])  # 8: [5,7]) 4: [2,3]) 40: [25,35]) 80: [55,75])
-checkpoint_config = dict(interval=1)
+checkpoint_config = dict(interval=1, create_symlink=False)
 # yapf:disable
 log_config = dict(
     interval=59,
@@ -120,7 +121,7 @@ start_epoch=0
 total_epochs = 80
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/LT_coco_resnet50_pfc_DB_uniform_bce_all_test'
+work_dir = '/media/mark/T7 Shield/work_dirs/LT_coco_resnet50_pfc_DB_uniform_bce_all_v1'
 load_from = None
 if start_epoch > 0:
     resume_from = work_dir + '/epoch_{}.pth'.format(start_epoch)

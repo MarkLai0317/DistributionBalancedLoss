@@ -270,6 +270,7 @@ def main():
                         selected_outputs = outputs[:, selected]
                         selected_gt_labels = gt_labels[:, selected]
                         classes = np.asarray(dataset.CLASSES)[selected]
+                        # print(selected_outputs)
                         mAP, APs = eval_map(selected_outputs, selected_gt_labels, classes, print_summary=False)
                         micro_f1, macro_f1 = eval_F1(selected_outputs, selected_gt_labels)
                         acc, per_cls_acc = eval_acc(selected_outputs, selected_gt_labels)

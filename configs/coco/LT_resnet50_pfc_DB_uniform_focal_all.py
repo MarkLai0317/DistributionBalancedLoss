@@ -14,7 +14,7 @@ model = dict(
         num_classes=80,
         method='fc',
         loss_cls=dict(
-          type='MyFocalLoss', reduction='mean')))
+          type='FocalLoss', reduction='mean')))
             # type='ResampleLoss', use_sigmoid=True,
             # reweight_func='rebalance',
             # focal=dict(focal=True, balance_param=2.0, gamma=2),
@@ -120,7 +120,7 @@ start_epoch=0
 total_epochs = 80
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
-work_dir = './work_dirs/LT_coco_resnet50_pfc_DB_uniform_focal_all_test'
+work_dir = './work_dirs/LT_coco_resnet50_pfc_DB_uniform_focal_all2_test'
 load_from = None
 if start_epoch > 0:
     resume_from = work_dir + '/epoch_{}.pth'.format(start_epoch)

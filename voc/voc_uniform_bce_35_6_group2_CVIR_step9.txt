@@ -1,0 +1,1 @@
+Best epoch for total mAP: 25 with score: 0.8250

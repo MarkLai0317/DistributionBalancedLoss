@@ -29,8 +29,8 @@ do
   CSV_PATH="${DATA_ROOT}/group2_step${i}_train_data.csv"
   NUM_CLASSES=$(head -n 1 "$CSV_PATH" | awk -F',' '{print NF-1}')
   ONLINE_PATH="${DATA_ROOT}/35_6_group2_step${i}/"
-  WORK_DIR="./work_dirs/LT_voc_resnet50_pfc_DB_uniform_bce_35_6_group2_step${i}"
-  OUTPUT_FILE="${OUTPUT_DIR}/LT_resnet50_pfc_DB_uniform_bce_35_6_group2_step${i}.py"
+  WORK_DIR="./work_dirs/LT_voc_resnet50_pfc_DB_uniform_bce_35_6_group2_CVIR_step${i}"
+  OUTPUT_FILE="${OUTPUT_DIR}/LT_resnet50_pfc_DB_uniform_bce_35_6_group2_CVIR_step${i}.py"
 
   sed \
     -e "s/^\s*num_classes\s*=.*/        num_classes=${NUM_CLASSES},/" \

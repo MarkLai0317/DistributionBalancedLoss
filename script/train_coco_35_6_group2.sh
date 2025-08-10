@@ -1,14 +1,14 @@
 #!/bin/sh
 
 MAX_PARALLEL=3
-START=1
+START=4
 END=10
 COUNTER=0
 
 for i in $(seq $START $END)
 do
   echo "Launching training for group2 step$i..."
-  python tools/train.py configs/coco/35_6/LT_resnet50_pfc_DB_uniform_bce_35_6_group2_step${i}.py &
+  python tools/train.py configs/coco/35_6_CVIR/LT_resnet50_pfc_DB_uniform_bce_35_6_CVIR_group2_step${i}.py &
 
   COUNTER=$((COUNTER+1))
 

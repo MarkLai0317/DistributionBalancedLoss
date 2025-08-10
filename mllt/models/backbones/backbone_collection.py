@@ -386,7 +386,7 @@ class PretrainResNet50(nn.Module):
         super(PretrainResNet50, self).__init__()
         # Load pre-trained ResNet50 model
         resnet50 = models.resnet50(weights='DEFAULT')
-        
+        # resnet50 = models.resnet50(weights='IMAGENET1K_V1')
         # Remove the fully connected (classification) layer
         self.features = nn.Sequential(
             resnet50.conv1,
@@ -399,6 +399,7 @@ class PretrainResNet50(nn.Module):
             resnet50.layer4,
             resnet50.avgpool,  # Global average pooling
         )
+        # self.freeze_stages(1)
 
         print(self.features)
         
@@ -435,7 +436,87 @@ class PretrainResNet50(nn.Module):
     def init_weights(self, pretrained=None):
         if pretrained is not None:
             self.load_state_dict(torch.load(pretrained, map_location=lambda storage, loc: storage))
+
+    def freeze_stages(self, frozen_stages: int):
+        if frozen_stages >= 0:
+            for param in self.features[0].parameters():  # conv1
+                param.requires_grad = False
+            for param in self.features[1].parameters():  # bn1
+                param.requires_grad = False
+            self.features[1].eval()  # bn1 in eval mode
+
+        # Freeze layer1 to layerN based on frozen_stages
+        stage_mapping = {
+            1: 4,  # layer1
+            2: 5,  # layer2
+            3: 6,  # layer3
+            4: 7   # layer4
+        }
+
+        for stage in range(1, frozen_stages + 1):
+            idx = stage_mapping.get(stage)
+            if idx is not None:
+                for param in self.features[idx].parameters():
+                    param.requires_grad = False
+                self.features[idx].eval()  # put frozen layers in eval mode
+            
+
+@BACKBONES.register_module
+class PretrainResNet101(nn.Module):
+    def __init__(self, num_classes=None, flatten=True):
+        """
+        Initializes the ResNet101 model.
+
+        Args:
+            num_classes (int, optional): If specified, adds a fully connected layer for classification.
+            flatten (bool): If True, flattens the feature map output after global average pooling.
+        """
+        super(PretrainResNet101, self).__init__()
+        # Load pre-trained ResNet101 model
+        resnet101 = models.resnet101(weights='DEFAULT')
+        # resnet101 = models.resnet101(weights='IMAGENET1K_V1')
         
+        # Remove the fully connected (classification) layer
+        self.features = nn.Sequential(
+            resnet101.conv1,
+            resnet101.bn1,
+            resnet101.relu,
+            resnet101.maxpool,
+            resnet101.layer1,
+            resnet101.layer2,
+            resnet101.layer3,
+            resnet101.layer4,
+            resnet101.avgpool,  # Global average pooling
+        )
+
+        self.flatten = flatten
+        self.final_feat_dim = 2048  # ResNet101 also outputs 2048-dim after avgpool
+
+        # Optional fully connected layer for classification
+        if num_classes is not None:
+            self.fc = nn.Sequential(
+                nn.Linear(self.final_feat_dim, 256),
+                nn.BatchNorm1d(256),
+                nn.ReLU(),
+                nn.Linear(256, num_classes),
+            )
+        else:
+            self.fc = None
+
+    def forward(self, x):
+        features = self.features(x)
+        
+        if self.flatten:
+            features = features.view(features.size(0), -1)  # Flatten to [batch_size, 2048]
+        
+        if self.fc:
+            return self.fc(features)
+        
+        return features
+
+    def init_weights(self, pretrained=None):
+        if pretrained is not None:
+            self.load_state_dict(torch.load(pretrained, map_location=lambda storage, loc: storage))
 
 
 def Conv4():
