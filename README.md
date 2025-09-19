@@ -37,7 +37,7 @@ python tools/train.py configs/voc/LT_resnet50_pfc_DB.py
 ```
 bash tools/dist_test.sh configs/coco/LT_resnet50_pfc_DB.py work_dirs/LT_coco_resnet50_pfc_DB/epoch_8.pth 1
 ```
-
+bash tools/dis_test.sh configs/coco/LT_resnet50_pfc_DB_classaware_DBloss.py "/media/mark/T7 Shield/work_dirs/LT_coco_resnet50_pfc_DB_classaware_DBloss_test4/epoch_8.pth" 1
 #### VOC-MLT
 ```
 bash tools/dist_test.sh configs/voc/LT_resnet50_pfc_DB.py work_dirs/LT_voc_resnet50_pfc_DB/epoch_8.pth 1
@@ -112,3 +112,6 @@ The use of this software is RESTRICTED to **non-commercial research and educatio
 ## Contact
 
 This repo is currently maintained by [@wutong16](https://github.com/wutong16) and [@hqqasw](https://github.com/hqqasw)
+
+
+## use the df_to_annotation.sh in script folder in multi-label_classification and it will generate 4 files that are used for training and inference in this repo
