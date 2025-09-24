@@ -14,12 +14,9 @@ model = dict(
         num_classes=15,
         method='fc',
         loss_cls=dict(
-            type='ResampleLoss', use_sigmoid=True,
-            reweight_func='rebalance',
-            focal=dict(focal=True, balance_param=2.0, gamma=2),
-            logit_reg=dict(neg_scale=2.0, init_bias=0.05),
-            map_param=dict(alpha=0.1, beta=10.0, gamma=0.2),
-            loss_weight=1.0, freq_file='appendix/nih/longtailnih/class_freq.pkl')))
+          type='BCELoss', reduction='mean')
+          )
+    )
 # model training and testing settings
 train_cfg = dict()
 test_cfg = dict()
@@ -116,7 +113,7 @@ lr_config = dict(
 evaluation = dict(interval=5)
 # runtime settings
 start_epoch=0
-total_epochs = 8
+total_epochs = 80
 dist_params = dict(backend='nccl')
 log_level = 'INFO'
 work_dir = './work_dirs/LT_coco_resnet50_pfc_DB_pretrain_test'

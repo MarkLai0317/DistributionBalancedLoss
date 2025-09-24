@@ -63,5 +63,5 @@ CUDA_VISIBLE_DEVICES=1 python tools/train.py configs/nih/LT_resnet50_pfc_DB.py
 
 ```bash
 bash tools/dist_test.sh configs/nih/LT_resnet50_pfc_DB.py \
-  work_dirs/LT_coco_resnet50_pfc_DB_pretrain_test/epoch_8.pth 1
+  work_dirs/LT_coco_resnet50_pfc_DB_pretrain_test/epoch_80.pth 1
 ```
