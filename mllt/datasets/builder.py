@@ -23,7 +23,6 @@ def _concat_dataset(cfg):
         if isinstance(pseudo_files, (list, tuple)):
             data_cfg['pseudo_file'] = pseudo_files[i]
         datasets.append(build_dataset(data_cfg))
-
     return ConcatDataset(datasets)
 
 
@@ -33,6 +32,6 @@ def build_dataset(cfg):
     elif isinstance(cfg['ann_file'], (list, tuple)):
         dataset = _concat_dataset(cfg)
     else:
+        print(DATASETS)
         dataset = build_from_cfg(cfg, DATASETS)
-
     return dataset

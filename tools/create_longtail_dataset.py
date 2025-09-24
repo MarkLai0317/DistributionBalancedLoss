@@ -6,6 +6,7 @@ import xml.etree.ElementTree as ET
 from matplotlib import pyplot as plt
 from scipy.stats import pareto
 import numpy as np
+import pandas as pd
 import mmcv
 import random
 from mmcv import mkdir_or_exist
@@ -192,7 +193,10 @@ def create_voc_longtail(year=2012,  max=800, b = 6, save_dir ='./appendix/VOCdev
 
 
 def create_coco_longtail(year=2017, max=1200, min=1, b = 6, save_dir ='./appendix/coco', draw=False):
-    data = mmcv.load('appendix/coco/terse_gt_{}.pkl'.format(year))
+    if year == 'nih':
+        data = mmcv.load('appendix/nih/terse_gt_{}.pkl'.format(year))
+    else:
+        data = mmcv.load('appendix/coco/terse_gt_{}.pkl'.format(year))
     gt_labels = data['gt_labels']
     test_gt_labels = data['test_gt_labels']
     test_samples = np.sum(test_gt_labels, axis=0)
@@ -201,8 +205,10 @@ def create_coco_longtail(year=2017, max=1200, min=1, b = 6, save_dir ='./appendi
 
     save_dir  = osp.join(save_dir, 'longtail' + str(year))
     mkdir_or_exist(save_dir)
-    category_names = get_classes('coco')
-    num_classes = len(category_names)
+    if year == 'nih':
+        num_classes = 15
+    else:
+        num_classes = 80
     sample_num = np.sum(gt_labels, axis=0)
     rank_idx = np.argsort(-sample_num)
     ref_dist = pareto_dist(b, num_classes, max=max, min=min, tail=0.99, display=False)
@@ -271,55 +277,108 @@ def create_coco_longtail(year=2017, max=1200, min=1, b = 6, save_dir ='./appendi
         sample_num[0] = 0
         ax.bar(range(num_classes), sample_num[rank_idx],alpha=0.5)
         ax.bar(range(num_classes), sample_num[rank_idx][1]/max*ref_dist, alpha=0.5)
-        _savefig('./data/longtail/coco_dist_ref.jpg')
+        _savefig(save_dir + '/coco_dist_ref.jpg')
         # test sample number distribution
         fig, ax = plt.subplots(1, 1)
         test_samples[rank_idx][0] = 0
         ax.bar(range(num_classes), test_samples[rank_idx])
         ax.set_xlabel('sorted class index')
         ax.set_ylabel('test sample numbers')
-        _savefig('./coco_test_dist.jpg')
+        _savefig(save_dir + '/coco_test_dist.jpg')
         # total samples added each time
         fig, ax = plt.subplots(1, 1)
         ax.bar(range(num_classes), add_new)
-        plt.savefig('./coco_add_samplenum.jpg')
+        plt.savefig(save_dir + '/coco_add_samplenum.jpg')
         # probability distribution
         fig, ax = plt.subplots(1, 1)
         ax.bar(range(num_classes), sample_prob[rank_idx])
-        plt.savefig('./data/longtail/coco_prob.jpg')
+        plt.savefig(save_dir + '/coco_prob.jpg')
         # new dataset sample number distribution
         fig, ax1 = plt.subplots(1, 1)
         ax1.bar(range(num_classes), select_sample_num[rank_idx])
         for y in [20,100]:
             plt.hlines(y, 0, 80, linestyles='dashed', color='r', linewidth=0.5)
         ax1.plot(range(num_classes), 20 * class_per_image[rank_idx], color='purple', alpha=0.5)
-        _savefig('./data/longtail/coco_sel_dist.jpg')
+        _savefig(save_dir + '/coco_sel_dist.jpg')
         # per-class samples added each time
         fig, ax = plt.subplots(1, 1)
         for i in range(len(pile_dist)):
             ax.bar(range(num_classes), pile_dist[-i][rank_idx])
         ax.set_xlabel('sorted class index')
         ax.set_ylabel('train sample numbers')
-        _savefig('./coco_add_perclass.jpg')
+        _savefig(save_dir + '/coco_add_perclass.jpg')
 
-    head_clas, middle_clas, tail_clas = [set(np.where(select_sample_num>=100)[0]),
-                                         set(np.where((select_sample_num<100) * (select_sample_num >= 20))[0]),
-                                         set(np.where(select_sample_num<20)[0])]
-    print('Train set, head classes: {:d}, middle classes: {:d}, tail classes: {:d}'.format(
-        len(head_clas), len(middle_clas), len(tail_clas)))
-    print('dataset length: {}'.format(len(select_img_id)))
-
-    save_path = osp.join(save_dir, 'img_id.pkl')
-    if osp.exists(save_path):
-        print('{} already exists, won\'t overwrite!'.format(save_path))
-    else:
-        with open(save_path, "w") as f:
-            for img_id in select_img_id:
-                f.writelines("%s\n" % img_id)
-        mmcv.dump(dict(head=head_clas, middle=middle_clas, tail=tail_clas), osp.join(save_dir, 'class_split.pkl'))
-        print('new dataset saved in {}'.format(save_path))
-        print('class split saved in {}'.format(osp.join(save_dir, 'class_split.pkl')))
     return
+
+def prepare_nih_pkl(
+    csv_path="../NIH_dataset/Data_Entry_2017.csv",
+    train_list="../NIH_dataset/train_val_list.txt",
+    test_list="../NIH_dataset/test_list.txt",
+    save_path="appendix/nih/terse_gt_nih.pkl"
+):
+    """把 NIH ChestX-ray dataset 轉成 COCO-like 的 terse_gt.pkl"""
+
+    # 讀 NIH 標註
+    df = pd.read_csv(csv_path)
+
+    # 取出所有疾病 label
+    all_labels = set()
+    for labels in df["Finding Labels"]:
+        for l in labels.split("|"):
+            all_labels.add(l.strip())
+    all_labels = sorted(list(all_labels))
+    num_classes = len(all_labels)
+    label2idx = {l: i for i, l in enumerate(all_labels)}
+    print(label2idx)
+
+    # 轉 multi-hot vector
+    img2label = {}
+    for _, row in df.iterrows():
+        img = row["Image Index"]
+        labels = row["Finding Labels"].split("|")
+        vec = np.zeros(num_classes, dtype=int)
+        for l in labels:
+            vec[label2idx[l.strip()]] = 1
+        img2label[img] = vec
+
+    # train/test split
+    train_imgs = [l.strip() for l in open(train_list)]
+    test_imgs = [l.strip() for l in open(test_list)]
+
+    train_labels = np.array([img2label[img] for img in train_imgs])
+    test_labels = np.array([img2label[img] for img in test_imgs])
+
+    data = {
+        "gt_labels": train_labels,
+        "test_gt_labels": test_labels,
+        "img_id2idx": {img: i for i, img in enumerate(train_imgs)},
+        "idx2img_id": {i: img for i, img in enumerate(train_imgs)}
+    }
+
+    mmcv.dump(data, save_path)
+    print(f"Saved NIH dataset (COCO-like) to {save_path}")
+    return all_labels  # 回傳 class list
+
+def create_nih_longtail(
+    csv_path="../NIH_dataset/Data_Entry_2017.csv",
+    train_list="../NIH_dataset/train_val_list.txt",
+    test_list="../NIH_dataset/test_list.txt",
+    save_dir="./appendix/nih",
+    max=1200, min=1, b=6, draw=True
+):
+    """把 NIH dataset 轉成 long-tail 版本 (包裝 create_coco_longtail)"""
+
+    mkdir_or_exist(save_dir)
+
+    pkl_path = osp.join(save_dir, "terse_gt_nih.pkl")
+    classes = prepare_nih_pkl(csv_path, train_list, test_list, pkl_path)
+    print(classes)
+
+    # 直接調用 create_coco_longtail，但 year 改成 "nih"
+    create_coco_longtail(year="nih", max=max, min=min, b=b,
+                         save_dir=save_dir, draw=draw)
+
+    return classes
 
 def lvis_longtail_statistics(file='./appendix/lvis/longtail/statistics.pkl', save_dir='./appendix/lvis/longtail/'):
     data = mmcv.load(file)
@@ -411,11 +470,6 @@ def lvis_longtail_statistics(file='./appendix/lvis/longtail/statistics.pkl', sav
     print('class seen and unseen data saved at {}'.format(save_dir+'class_data.pkl'))
 
 if __name__ == '__main__':
-    create_voc_longtail()
-    create_coco_longtail()
-
-
-
-
-
-
+    # create_voc_longtail()
+    # create_coco_longtail()
+    create_nih_longtail()

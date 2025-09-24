@@ -4,6 +4,7 @@ from .coco import CocoDataset
 from .Lvis import LvisDataset
 from .mured import MuredDataset, MuredDatasetGroup3, MuredDatasetGroup2, MuredDatasetGroup1
 from .voc import VOCDataset
+from .nih import NIHDataset, NIHDatasetGroup1, NIHDatasetGroup2, NIHDatasetGroup2
 from .miniImagenet import miniImagenetDataset
 from .loader import GroupSampler, DistributedGroupSampler, build_dataloader
 from .utils import to_tensor, random_scale, get_dataset
@@ -17,5 +18,6 @@ __all__ = [
     'CustomDataset','CocoDataset', 'miniImagenetDataset', 'LvisDataset', 'GroupSampler',
     'DistributedGroupSampler', 'build_dataloader', 'to_tensor', 'random_scale',
     'get_dataset', 'ExtraAugmentation', 'CocoDatasetOriginalGroup1', 'CocoDatasetOriginalGroup2',
-    'CocoDatasetOriginalGroup3', 'MuredDataset', 'MuredDatasetGroup3', 'MuredDatasetGroup1', 'MuredDatasetGroup2'
+    'CocoDatasetOriginalGroup3', 'MuredDataset', 'MuredDatasetGroup3', 'MuredDatasetGroup1', 'MuredDatasetGroup2',
+    'NIHDataset', 'NIHDatasetGroup1', 'NIHDatasetGroup2', 'NIHDatasetGroup3'
 ]

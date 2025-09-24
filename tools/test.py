@@ -21,6 +21,7 @@ from mllt.models import build_classifier
 from mllt.core.evaluation.eval_tools import lists_to_arrays, eval_acc, eval_F1
 from mllt.core.evaluation.mean_ap import eval_map
 from mllt.models.losses import accuracy
+from sklearn.metrics import roc_auc_score, f1_score
 
 rlimit = resource.getrlimit(resource.RLIMIT_NOFILE)
 resource.setrlimit(resource.RLIMIT_NOFILE, (20480, rlimit[1]))
