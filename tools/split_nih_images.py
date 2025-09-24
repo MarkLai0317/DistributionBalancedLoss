@@ -67,7 +67,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--image-root", required=True, help="Root folder (with images_001/, images_002/ ...)")
-    parser.add_argument("--train-pkl", required=True, help="Path to img_id.pkl")
+    parser.add_argument("--train-txt", required=True, help="Path to img_id.txt")
     parser.add_argument("--test-txt", required=True, help="Path to test_list.txt")
     parser.add_argument("--output-root", required=True, help="Output folder for train/ and test/")
     parser.add_argument("--mode", choices=["copy", "symlink"], default="copy", help="Move mode: copy or symlink")

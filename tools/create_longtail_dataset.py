@@ -308,6 +308,23 @@ def create_coco_longtail(year=2017, max=1200, min=1, b = 6, save_dir ='./appendi
         ax.set_ylabel('train sample numbers')
         _savefig(save_dir + '/coco_add_perclass.jpg')
 
+    head_clas, middle_clas, tail_clas = [set(np.where(select_sample_num>=100)[0]),
+                                         set(np.where((select_sample_num<100) * (select_sample_num >= 20))[0]),
+                                         set(np.where(select_sample_num<20)[0])]
+    print('Train set, head classes: {:d}, middle classes: {:d}, tail classes: {:d}'.format(
+        len(head_clas), len(middle_clas), len(tail_clas)))
+    print('dataset length: {}'.format(len(select_img_id)))
+
+    save_path = osp.join(save_dir, 'img_id.txt')
+    if osp.exists(save_path):
+        print('{} already exists, won\'t overwrite!'.format(save_path))
+    else:
+        with open(save_path, "w") as f:
+            for img_id in select_img_id:
+                f.writelines("%s\n" % img_id)
+        mmcv.dump(dict(head=head_clas, middle=middle_clas, tail=tail_clas), osp.join(save_dir, 'class_split.pkl'))
+        print('new dataset saved in {}'.format(save_path))
+        print('class split saved in {}'.format(osp.join(save_dir, 'class_split.pkl')))
     return
 
 def prepare_nih_pkl(
