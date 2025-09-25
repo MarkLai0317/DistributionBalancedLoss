@@ -42,7 +42,7 @@ img_size=224
 data = dict(
     imgs_per_gpu=32,
     workers_per_gpu=2,
-    sampler='ClassAware',
+    sampler='RandomSampler',
     train=dict(
             type=dataset_type,
             ann_file=online_data_root + 'train_annotations.pkl',
@@ -81,7 +81,7 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=1.0 / 3,
-    step=[5,7])  # 8: [5,7]) 4: [2,3]) 40: [25,35]) 80: [55,75])
+    step=[55,75])  # 8: [5,7]) 4: [2,3]) 40: [25,35]) 80: [55,75])
 checkpoint_config = dict(interval=1)
 # yapf:disable
 log_config = dict(
@@ -99,7 +99,7 @@ lr_config = dict(
     warmup='linear',
     warmup_iters=500,
     warmup_ratio=1.0 / 3,
-    step=[5,7])  # 8: [5,7]) 4: [2,3]) 40: [25,35]) 80: [55,75])
+    step=[55,75])  # 8: [5,7]) 4: [2,3]) 40: [25,35]) 80: [55,75])
 # lr_config = dict(
 #     policy='OneCycle',
 #     max_lr=0.002,
