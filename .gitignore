@@ -131,3 +131,4 @@ test.py
 tools/create_label/*
 *.jpg
 images/
+tmp*

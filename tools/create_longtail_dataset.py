@@ -297,7 +297,7 @@ def create_coco_longtail(year=2017, max=1200, min=1, b = 6, save_dir ='./appendi
         fig, ax1 = plt.subplots(1, 1)
         ax1.bar(range(num_classes), select_sample_num[rank_idx])
         for y in [20,100]:
-            plt.hlines(y, 0, 80, linestyles='dashed', color='r', linewidth=0.5)
+            plt.hlines(y, 0, num_classes, linestyles='dashed', color='r', linewidth=0.5)
         ax1.plot(range(num_classes), 20 * class_per_image[rank_idx], color='purple', alpha=0.5)
         _savefig(save_dir + '/coco_sel_dist.jpg')
         # per-class samples added each time

@@ -2,6 +2,7 @@ import os
 import shutil
 import pickle
 import argparse
+from tqdm import tqdm
 
 
 def build_filename_index(image_root):
@@ -15,13 +16,12 @@ def build_filename_index(image_root):
     return filename_to_path
 
 
-def load_train_ids(pkl_path):
-    """載入 train split (img_id.pkl)"""
+def load_train_ids(txt_path):
+    """載入 train split (img_id.txt)"""
     ids = []
-    with open(pkl_path, "r") as f:
-        for line in f:
-            ids.append(line.strip())
-    print(f"Loaded {len(ids)} train images from {pkl_path}")
+    with open(txt_path, "r") as f:
+        ids = [line.strip() for line in f if line.strip()]
+    print(f"Loaded {len(ids)} train images from {txt_path}")
     return ids
 
 
@@ -33,12 +33,12 @@ def load_test_ids(txt_path):
     return test_ids
 
 
-def move_images(ids, split_name, filename_to_path, output_root, mode="copy"):
+def move_images(ids, split_name, filename_to_path, output_root, mode="symlink"):
     """把圖片搬到 split 資料夾"""
     split_dir = os.path.join(output_root, split_name)
     os.makedirs(split_dir, exist_ok=True)
 
-    for img in ids:
+    for img in tqdm(ids, desc=f"Moving {split_name} images"):
         if img not in filename_to_path:
             print(f"[WARNING] {split_name} image not found: {img}")
             continue
@@ -57,7 +57,7 @@ def move_images(ids, split_name, filename_to_path, output_root, mode="copy"):
 def main(args):
     filename_to_path = build_filename_index(args.image_root)
 
-    train_ids = load_train_ids(args.train_pkl)
+    train_ids = load_train_ids(args.train_txt)
     test_ids = load_test_ids(args.test_txt)
 
     move_images(train_ids, "train", filename_to_path, args.output_root, args.mode)
