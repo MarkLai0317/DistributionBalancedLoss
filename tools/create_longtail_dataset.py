@@ -316,15 +316,12 @@ def create_coco_longtail(year=2017, max=1200, min=1, b = 6, save_dir ='./appendi
     print('dataset length: {}'.format(len(select_img_id)))
 
     save_path = osp.join(save_dir, 'img_id.txt')
-    if osp.exists(save_path):
-        print('{} already exists, won\'t overwrite!'.format(save_path))
-    else:
-        with open(save_path, "w") as f:
-            for img_id in select_img_id:
-                f.writelines("%s\n" % img_id)
-        mmcv.dump(dict(head=head_clas, middle=middle_clas, tail=tail_clas), osp.join(save_dir, 'class_split.pkl'))
-        print('new dataset saved in {}'.format(save_path))
-        print('class split saved in {}'.format(osp.join(save_dir, 'class_split.pkl')))
+    with open(save_path, "w") as f:
+        for img_id in select_img_id:
+            f.writelines("%s\n" % img_id)
+    mmcv.dump(dict(head=head_clas, middle=middle_clas, tail=tail_clas), osp.join(save_dir, 'class_split.pkl'))
+    print('new dataset saved in {}'.format(save_path))
+    print('class split saved in {}'.format(osp.join(save_dir, 'class_split.pkl')))
     return
 
 def prepare_nih_pkl(
@@ -489,4 +486,4 @@ def lvis_longtail_statistics(file='./appendix/lvis/longtail/statistics.pkl', sav
 if __name__ == '__main__':
     # create_voc_longtail()
     # create_coco_longtail()
-    create_nih_longtail()
+    create_nih_longtail(max=40000)
