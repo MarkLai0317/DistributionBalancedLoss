@@ -40,20 +40,12 @@ def build_filename_index(image_root):
     return filename_to_path
 
 
-def load_train_ids(txt_path):
-    """載入 train split (txt only)"""
+def load_image_ids(txt_path):
+    """載入圖片 ID 列表 (通用函數)"""
     with open(txt_path, "r") as f:
         ids = [line.strip() for line in f if line.strip()]
-    print(f"Loaded {len(ids)} train images from {txt_path}")
+    print(f"Loaded {len(ids)} images from {txt_path}")
     return ids
-
-
-def load_test_ids(txt_path):
-    """載入 test split (test_list.txt)"""
-    with open(txt_path, "r") as f:
-        test_ids = [line.strip() for line in f if line.strip()]
-    print(f"Loaded {len(test_ids)} test images from {txt_path}")
-    return test_ids
 
 
 def generate_class_freq(df, label_columns, output_path):
@@ -132,10 +124,11 @@ def main(args):
     filename_to_path = build_filename_index(args.image_root)
 
     # --- Step 4: Load splits ---
-    train_ids = load_train_ids(args.train_txt)
-    test_ids = load_test_ids(args.test_txt)
+    train_ids = load_image_ids(args.train_txt)
+    eval_ids = load_image_ids(args.eval_txt) if args.eval_txt else []
+    test_ids = load_image_ids(args.test_txt)
 
-    # --- Step 5: Build train/test annotations ---
+    # --- Step 5: Build train/eval/test annotations ---
     os.makedirs(args.output_dir, exist_ok=True)
     train_output = os.path.join(args.output_dir, "train_annotations.pkl")
     test_output = os.path.join(args.output_dir, "test_annotations.pkl")
@@ -147,6 +140,13 @@ def main(args):
     train_df = make_annotations(df, train_ids, label_columns, filename_to_path, "train", train_output, train_csv_output)
     test_df = make_annotations(df, test_ids, label_columns, filename_to_path, "test", test_output, test_csv_output)
 
+    # Build eval annotations if eval_txt is provided
+    if args.eval_txt and eval_ids:
+        eval_output = os.path.join(args.output_dir, "eval_annotations.pkl")
+        eval_csv_output = os.path.join(args.output_dir, "eval_data.csv")
+        eval_df = make_annotations(df, eval_ids, label_columns, filename_to_path, "eval", eval_output, eval_csv_output)
+        print(f"✅ Created eval split with {len(eval_ids)} images")
+
     # --- Step 6: Build class_freq.pkl (using train set only) ---
     generate_class_freq(train_df, label_columns, class_freq_path)
 
@@ -156,6 +156,7 @@ if __name__ == "__main__":
     parser.add_argument("--df", required=True, help="Path to Data_Entry_2017.csv")
     parser.add_argument("--image-root", required=True, help="Root folder (with images_001/, images_002/ ...)")
     parser.add_argument("--train-txt", required=True, help="Path to train split (txt only)")
+    parser.add_argument("--eval-txt", help="Path to eval split (txt only, optional)")
     parser.add_argument("--test-txt", required=True, help="Path to test split (test_list.txt)")
     parser.add_argument("--output-dir", required=True, help="Directory to save all outputs")
     args = parser.parse_args()

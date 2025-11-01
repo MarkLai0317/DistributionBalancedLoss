@@ -48,7 +48,7 @@ def multi_gpu_test(model, data_loader, tmpdir=None):
         prog_bar = mmcv.ProgressBar(len(dataset), bar_width=20)
     for i, data in enumerate(data_loader):
         with torch.no_grad():
-            result = model(return_loss=False, rescale=True, **data)
+             result = model(return_loss=False, rescale=True, **data)
         results.append(result.cpu().numpy())
 
         if rank == 0:
@@ -100,44 +100,61 @@ def collect_results(result_part, size, tmpdir=None):
         return ordered_results
 
 
-def make_dataset_list(cfg, test_only=True):
-    cfg.data.test.test_mode = True
-    test_dataset = build_dataset(cfg.data.test)
-    dataset_list = [test_dataset]
-    if test_only:
+def make_dataset_list(cfg, mode='test'):
+    """Build dataset list based on mode (train/val/test) - keeping original logic"""
+    if mode == 'test':
+        # Original test logic
+        cfg.data.test.test_mode = True
+        test_dataset = build_dataset(cfg.data.test)
+        dataset_list = [test_dataset]
         return dataset_list
+    elif mode == 'val':
+        # Validation mode
+        if hasattr(cfg.data, 'val') and cfg.data.val is not None:
+            cfg.data.val.test_mode = True
+            val_dataset = build_dataset(cfg.data.val)
+            dataset_list = [val_dataset]
+            return dataset_list
+        else:
+            raise ValueError("Validation dataset not found in config. Please check cfg.data.val")
+    elif mode == 'train':
+        # Train mode - only use train dataset
+        dataset_list = []
+        
+        if cfg.data.train.get('dataset', None) is not None:
+            train_cfg = cfg.data.train.dataset
+        else:
+            train_cfg = cfg.data.train
+        train_cfg.test_mode = True
+        train_cfg.extra_aug = None
+        train_cfg.flip_ratio = 0
+        train_dataset = build_dataset(train_cfg)
 
-    if cfg.data.train.get('dataset', None) is not None:
-        train_cfg = cfg.data.train.dataset
+        if isinstance(train_dataset, ConcatDataset):
+            train_datasets = train_dataset.datasets
+        else:
+            train_datasets = [train_dataset]
+
+        for train_dataset in train_datasets:
+            dataset_list.append(train_dataset)
+
+        return dataset_list
     else:
-        train_cfg = cfg.data.train
-    train_cfg.test_mode = True
-    train_cfg.extra_aug = None
-    train_cfg.flip_ratio = 0
-    train_dataset = build_dataset(train_cfg)
-
-    if isinstance(train_dataset, ConcatDataset):
-        train_datasets = train_dataset.datasets
-    else:
-        train_datasets = [train_dataset]
-
-    for train_dataset in train_datasets:
-        dataset_list.append(train_dataset)
-
-    return dataset_list
+        raise ValueError(f"Unsupported mode: {mode}. Supported modes are: train, val, test")
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Model Prediction')
     parser.add_argument('config', help='test config file path')
     parser.add_argument('checkpoint', help='checkpoint file')
+    parser.add_argument('--mode', choices=['train', 'val', 'test'], default='test',
+                        help='dataset mode to predict on (default: test)')
     parser.add_argument('--out', help='output result file')
     parser.add_argument('--show', default=True, help='show results')
     parser.add_argument('--tmpdir', help='tmp dir for writing some results')
     parser.add_argument('--launcher', choices=['none', 'pytorch', 'slurm', 'mpi'],
                         default='none', help='job launcher')
     parser.add_argument('--local_rank', type=int, default=0)
-    parser.add_argument('--testset_only', type=bool, default=True, help='only eval test set')
     args = parser.parse_args()
     if 'LOCAL_RANK' not in os.environ:
         os.environ['LOCAL_RANK'] = str(args.local_rank)
@@ -153,7 +170,7 @@ def main():
     if args.out is None:
         epoch = args.checkpoint.split('.')[-2].split('_')[-1]
         cfg.work_dir = osp.dirname(args.checkpoint)
-        args.out = osp.join(cfg.work_dir, 'predictions_e{}.pkl'.format(epoch))
+        args.out = osp.join(cfg.work_dir, 'predictions_{}_e{}.pkl'.format(args.mode, epoch))
 
     # init distributed env first, since logger depends on the dist info.
     if args.launcher == 'none':
@@ -169,7 +186,7 @@ def main():
     cfg.model.pretrained = None
 
     # build the dataloader
-    dataset_list = make_dataset_list(cfg, args.testset_only)
+    dataset_list = make_dataset_list(cfg, args.mode)
     # build the model and load checkpoint
     model = build_classifier(cfg.model, train_cfg=None, test_cfg=cfg.test_cfg)
     checkpoint = load_checkpoint(model, args.checkpoint, map_location='cpu')
@@ -177,8 +194,6 @@ def main():
     savedata = [dict() for _ in range(len(dataset_list))]
     
     for d, dataset in enumerate(dataset_list):
-        if args.testset_only and d > 0:
-            break
         data_loader = build_dataloader(
             dataset,
             imgs_per_gpu=1,

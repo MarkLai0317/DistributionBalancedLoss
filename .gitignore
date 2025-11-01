@@ -132,3 +132,4 @@ tools/create_label/*
 *.jpg
 images/
 tmp*
+plots

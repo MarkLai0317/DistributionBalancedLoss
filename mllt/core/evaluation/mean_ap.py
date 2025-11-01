@@ -28,8 +28,7 @@ def eval_map(results,
     assert results.shape[0] == gt_labels.shape[0]
     eval_results = []
     num_samples, num_classes = results.shape
-    # print(results)
-    APs = average_precision_score(gt_labels, results)
+    APs = average_precision_score(gt_labels, results, average=None)
     mAP = APs.mean()
     if print_summary:
         print_map_summary(mAP, APs, dataset)

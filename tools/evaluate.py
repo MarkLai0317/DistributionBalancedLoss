@@ -3,6 +3,7 @@ import os
 import os.path as osp
 import numpy as np
 import mmcv
+import json
 import sys
 sys.path.append(os.getcwd())
 
@@ -18,6 +19,7 @@ def parse_args():
     parser.add_argument('--eval', type=str, nargs='+', choices=['mAP', 'multiple'],
                         default=['multiple'], help='eval metrics')
     parser.add_argument('--testset_only', type=bool, default=True, help='only eval test set')
+    parser.add_argument('--out-json', help='output json file path (optional)')
     args = parser.parse_args()
     return args
 
@@ -40,6 +42,14 @@ def main():
     eval_metrics = args.eval
     display_dict['class'] = dataset.CLASSES
     
+    # Initialize results dictionary for JSON output
+    json_results = {
+        'config': args.config,
+        'predictions_file': args.predictions,
+        'class_names': dataset.CLASSES,
+        'datasets': []
+    }
+    
     for i, data in enumerate(savedata):
         if args.testset_only and i > 0:  # test-set only
             break
@@ -57,6 +67,13 @@ def main():
         print(f'Outputs range: [{np.min(outputs):.4f}, {np.max(outputs):.4f}]')
         
         print('Starting evaluate {}'.format(' and '.join(eval_metrics)))
+        
+        # Initialize dataset results
+        dataset_results = {
+            'dataset_index': i,
+            'splits': {},
+            'overall': {}
+        }
         
         for eval_metric in eval_metrics:
             if eval_metric == 'mAP':
@@ -83,12 +100,33 @@ def main():
                     micro_f1, macro_f1 = eval_F1(selected_outputs, selected_gt_labels)
                     acc, per_cls_acc = eval_acc(selected_outputs, selected_gt_labels)
                     metrics.append([split, mAP, micro_f1, macro_f1, acc])
+                    
+                    # Store split results in JSON
+                    dataset_results['splits'][split] = {
+                        'mAP': float(mAP),
+                        'micro_f1': float(micro_f1),
+                        'macro_f1': float(macro_f1),
+                        'accuracy': float(acc),
+                        'per_class_accuracy': [float(x) for x in per_cls_acc],
+                        'class_indices': [int(x) for x in selected],
+                        'class_names': [dataset.CLASSES[idx] for idx in selected]
+                    }
                 
                 # Calculate overall metrics
                 mAP, APs = eval_map(outputs, gt_labels, dataset, print_summary=False)
                 micro_f1, macro_f1 = eval_F1(outputs, gt_labels)
                 acc, per_cls_acc = eval_acc(outputs, gt_labels)
                 metrics.append(['Total', mAP, micro_f1, macro_f1, acc])
+                
+                # Store overall results in JSON
+                dataset_results['overall'] = {
+                    'mAP': float(mAP),
+                    'micro_f1': float(micro_f1),
+                    'macro_f1': float(macro_f1),
+                    'accuracy': float(acc),
+                    'per_class_accuracy': [float(x) for x in per_cls_acc],
+                    'average_precision': [float(x) for x in APs] if APs is not None else None
+                }
                 
                 # Print results
                 print('\n' + '='*70)
@@ -98,6 +136,21 @@ def main():
                     print('Split:{:>6s} mAP:{:.4f}  acc:{:.4f}  micro:{:.4f}  macro:{:.4f}'.format(
                         split, mAP, acc, micro_f1, macro_f1))
                 print('='*70)
+        
+        json_results['datasets'].append(dataset_results)
+    
+    # Save JSON results
+    if args.out_json:
+        json_output_path = args.out_json
+    else:
+        # Generate default JSON filename based on predictions file
+        pred_basename = osp.splitext(osp.basename(args.predictions))[0]
+        json_output_path = osp.join(osp.dirname(args.predictions), f'{pred_basename}_evaluation.json')
+    
+    with open(json_output_path, 'w') as f:
+        json.dump(json_results, f, indent=2)
+    
+    print(f'\nEvaluation results saved to: {json_output_path}')
 
 
 if __name__ == '__main__':

@@ -55,8 +55,8 @@ data = dict(
             flip_ratio=0.5),
     val=dict(
         type=dataset_type,
-        ann_file=online_data_root + 'test_annotations.pkl',
-        img_prefix=data_root + 'test/',
+        ann_file=online_data_root + 'eval_annotations.pkl',
+        img_prefix=data_root + 'train/',
         img_scale=(img_size, img_size),
         img_norm_cfg=img_norm_cfg,
         size_divisor=32,
@@ -64,9 +64,9 @@ data = dict(
         flip_ratio=0),
     test=dict(
         type=dataset_type,
-        ann_file=online_data_root + 'train_annotations.pkl',
+        ann_file=online_data_root + 'test_annotations.pkl',
         class_split=online_data_root + 'class_split.pkl',
-        img_prefix=data_root + 'train/',
+        img_prefix=data_root + 'test/',
         img_scale=(img_size, img_size),
         img_norm_cfg=img_norm_cfg,
         size_divisor=32,
@@ -100,14 +100,6 @@ lr_config = dict(
     warmup_iters=500,
     warmup_ratio=1.0 / 3,
     step=[55,75])  # 8: [5,7]) 4: [2,3]) 40: [25,35]) 80: [55,75])
-# lr_config = dict(
-#     policy='OneCycle',
-#     max_lr=0.002,
-#     total_steps=705 * 8,
-#     div_factor=25,
-#     final_div_factor=100
-# )
-
 
 # yapf:enable
 evaluation = dict(interval=5)
