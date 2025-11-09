@@ -16,7 +16,7 @@ WORK_DIR="work_dirs/LT_coco_resnet50_pfc_DB_pretrain_test"
 GPUS=1
 
 # Dataset mode: train, val, or test (default: test)
-MODE=${1:-"train"}
+MODE=${1:-"test"}
 
 # Epoch range: 5, 10, 15, 20, ..., 80
 EPOCHS=($(seq 10 10 80))

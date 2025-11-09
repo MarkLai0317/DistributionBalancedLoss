@@ -211,6 +211,15 @@ def create_coco_longtail(year=2017, max=1200, min=1, b = 6, save_dir ='./appendi
         num_classes = 80
     sample_num = np.sum(gt_labels, axis=0)
     rank_idx = np.argsort(-sample_num)
+    
+    # Print sorted index and original label mapping
+    print("\n=== Sorted Index and Original Label Mapping ===")
+    print("Sorted by sample count (descending):")
+    print("Sorted Rank -> Original Class Index (Sample Count)")
+    for i, original_idx in enumerate(rank_idx):
+        print(f"Rank {i:2d} -> Class {original_idx:2d} ({sample_num[original_idx]:4d} samples)")
+    print("=" * 50)
+    
     ref_dist = pareto_dist(b, num_classes, max=max, min=min, tail=0.99, display=False)
 
     ori_idx_dic = { i: [] for i in range(num_classes) }
@@ -271,6 +280,15 @@ def create_coco_longtail(year=2017, max=1200, min=1, b = 6, save_dir ='./appendi
     select_sample_num = np.sum(select_labels, axis=0)
     class_per_image = class_per_image / select_sample_num
     rank_idx = np.argsort(-select_sample_num)
+    
+    # Print sampled dataset rank_idx and original class mapping
+    print("\n=== After Sampling: Rank Index and Original Class Mapping ===")
+    print("Sorted by sampled dataset sample count (descending):")
+    print("Sampled Rank -> Original Class Index (Sampled Count)")
+    for i, original_idx in enumerate(rank_idx):
+        print(f"Rank {i:2d} -> Class {original_idx:2d} ({select_sample_num[original_idx]:4d} samples)")
+    print("=" * 55)
+    
     if draw:
         # train sample number distribution
         fig, ax = plt.subplots(1, 1)
